@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Удаление категории</title>
+<script src="static/js/virtual-select.js"></script>
+<link href="static/css/virtual-select.min.css" rel="stylesheet" type="text/css">
+<link href="static/css/MyChoices.css" rel="stylesheet" type="text/css">
+<style>
+   .targetff {
+    font-size: 14pt;
+   }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="mb-4">Удаление категории</h1>
+    <form method="post" enctype="multipart/form-data" id="myForm">
+        <div id="example-select"></div><br><br>
+        {% for el in cats %}
+        <input class="options_for_select" hidden="hidden" id="{{ el.id }}" value="{{ el.title }}">
+        {% endfor %}
+        <button style="font-size: 20px;" class="btn btn-outline-danger" type="button"
+            data-bs-toggle="modal" data-bs-target="#myModal">Удалить категорию</button>
+        <a style="font-size: 20px;" class="ms-2 btn btn-outline-primary" href="/account">Вернуться</a><br><br>
+        <script>
+            $(function() {
+            $('#show_me').on('click', function(){
+                var kek = $('[name="categories"]').val();
+                console.log(kek);
+                $('#print').val(kek);
+            });
+            return false;
+        });
+    const elements = document.querySelectorAll('.options_for_select');
+    var lst = [];
+    elements.forEach(el => {
+        Option = {value: $(el).attr('id'), label: $(el).val()};
+        lst.push(Option);
+    });
+        VirtualSelect.init({
+  ele: '#example-select',
+  hasOptionDescription: true,
+  options: lst,
+  search: true,
+  name: 'parent',
+  placeholder: 'Выберите категорию для удаления',
+  multiple: false,
+  optionsCount: 4,
+  optionHeight: '60%',
+  required: true,
+  maxWidth: '100%',
+  noOptionsText: 'Пока что категорий нет...',
+  noSearchResultsText: 'Ничего не найдено',
+  searchPlaceholderText: 'Поиск...',
+});
+        </script>
+    </form>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content col-md-offset-2 col-md-offset-2 col-md-8">
+                <div class="modal-header">
+                    <h5 class="modal-title">Подтвердите удаление категории</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены?</p>
+                    <p>Подкатегории выбранной не удалятся</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Отмена</button>
+                    <a href="/category_delete" class="delete_button btn btn-outline-danger">Удалить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            $('.delete_button').on('click', function(){
+            var data1 = $('#myForm').serialize();
+                $.ajax({
+                    data : data1,
+                    type : 'POST',
+                    url : '/category_delete'
+                });
+                $(this).preventDefault
+            });
+            return false;
+        });
+    </script>
+</div>
+{% endblock %}

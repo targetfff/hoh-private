@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Стать продавцом</title>
+<style>
+   .targetff {
+    font-size: 15pt;
+   }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Стать продавцом</h1><br>
+    <p class="targetff">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis imperdiet massa tincidunt nunc pulvinar. Justo laoreet sit amet cursus sit amet dictum sit. Facilisi etiam dignissim diam quis enim lobortis. Tristique nulla aliquet enim tortor at auctor urna nunc. At consectetur lorem donec massa sapien. Dictum non consectetur a erat nam at lectus. Mattis enim ut tellus elementum sagittis vitae. Sodales ut etiam sit amet nisl purus. Rhoncus aenean vel elit scelerisque mauris pellentesque. At consectetur lorem donec massa sapien faucibus. Amet luctus venenatis lectus magna fringilla urna porttitor rhoncus dolor. Pellentesque dignissim enim sit amet venenatis urna cursus eget.
+    </p>
+    <h2>Заполните форму и оплатите вступительный взнос</h2><br>
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-floating">
+            <input type="text" class="form-control" name="surname" id="surname1"
+                   placeholder="Фамилия" required readonly value="{{ current_user.surname }}"><br>
+            <label for="surname1">Фамилия</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="name" id="name1"
+                   placeholder="Имя" required readonly value="{{ current_user.name }}"><br>
+            <label for="name1">Имя</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="patronymic" id="patronymic1"
+                   placeholder="Отчество" required ><br>
+            <label for="patronymic1">Отчество</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="title" id="title1"
+               placeholder="Название магазина (необязательно)"><br>
+            <label for="title1">Название магазина (необязательно)</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="phone" id="phone1"
+                   placeholder="+7 (999) 999-99-99 " required readonly value="{{ current_user.phone }}"><br>
+            <label for="phone1">Номер телефона</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="email" id="email1"
+                   placeholder="your_email@example.com" required readonly value="{{ current_user.email }}"><br>
+            <label for="email1">Адрес электронной почты</label>
+        </div>
+
+        <label for="logo">Добавьте квадратный логотип магазина (необязательно):</label><br><br>
+        <input type="file" accept="image" name="logo" id="logo"><br>
+
+        <div class="form-check text-start my-3">
+            <input class="form-check-input" type="checkbox" name="user_agreement" id="user_agreement" required>
+            <label class="form-check-label" for="user_agreement">
+                Я даю&nbsp;<a href="#">согласие на обработку персональных данных</a>&nbsp;и заключение&nbsp;<a href="#">договора</a>
+            </label>
+        </div>
+
+        <button class="btn btn-success" type="submit">Оплатить</button>
+    </form>
+
+</div>
+
+<script type="text/javascript" src="static/js/jquery.maskedinput.min.js"></script>
+<script type="text/javascript" src="static/js/jquery.inputmask.bundle.js"></script>
+<script>
+    $(document).ready(function() {
+        $("#phone").mask("+7 (999) 999-99-99");
+    });
+
+    $.fn.setCursorPosition = function(pos) {
+        if ($(this).get(0).setSelectionRange) {
+        $(this).get(0).setSelectionRange(pos, pos);
+        } else if ($(this).get(0).createTextRange) {
+        var range = $(this).get(0).createTextRange();
+        range.collapse(true);
+        range.moveEnd('character', pos);
+        range.moveStart('character', pos);
+        range.select();
+    }};
+
+    $('input[name="phone"]').click(function(){
+        $(this).setCursorPosition(4);  // set position number
+    });
+</script>
+
+<script>
+    $('input[name="email"]').click(function(){
+            $("input#email").inputmask({
+                mask: "*{1,20}[_]*{0,20}[_]*{0,20}[_]*{0,20}@*{3,20}.*{2,7}",
+                showMaskOnFocus: false,
+                clearIncomplete: true,
+                showMaskOnHover: false
+            });
+        });
+</script>
+
+{% endblock %}
+

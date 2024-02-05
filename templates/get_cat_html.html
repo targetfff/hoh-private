@@ -1,0 +1,11 @@
+{% for cat in cats %}
+      <input type="checkbox" class="cat_checkbox" id="cat{{ cat[0].id }}"/>
+      {% if cat[1] %}
+      <label for="cat{{ cat[0].id }}" id="label_cat{{ cat[0].id }}">{{ cat[0].title }}</label>
+      <i id="_cat{{ cat[0].id }}" class="fa fa-plus"></i>
+      <br />
+      <div class="inner pre-animation for_inner_cat{{ cat[0].id }}"></div>
+      {% else %}
+      <label for="cat{{ cat[0].id }}">{{ cat[0].title }}</label> <br />
+      {% endif %}
+      {% endfor %}

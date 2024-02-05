@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Регистрация</title>
+{% endblock %}
+
+{% block body %}
+<main class="form-signin w-100 m-auto">
+  <form method="POST">
+    <h1>Регистрация</h1><br>
+
+    <div class="form-floating">
+      <input type="text" class="form-control" name="name" id="name" placeholder="Имя" required>
+      <label for="name">Имя</label>
+    </div><br>
+
+    <div class="form-floating">
+      <input type="text" class="form-control" name="surname" id="surname" placeholder="Фамилия" required>
+      <label for="surname">Фамилия</label>
+    </div><br>
+
+    <div class="form-floating">
+      <input type="text" class="form-control" name="phone" id="phone" placeholder="Номер телефона" required>
+      <label for="email">Номер телефона</label>
+    </div><br>
+
+    <div class="form-floating">
+      <input type="text" class="form-control" name="email" id="email" placeholder="name@example.com" required>
+      <label for="email">Адрес электронной почты</label>
+    </div><br>
+
+    <div class="form-floating">
+      <input type="password" class="form-control" id="password" name="password" placeholder="Пароль" required>
+      <label for="password">Пароль</label>
+    </div><br>
+
+    <div class="form-floating">
+      <input type="password" class="form-control" id="password2" name="password2"
+             placeholder="Повторите пароль" required>
+      <label for="password2">Повторите пароль</label>
+    </div><br>
+
+    <button class="btn btn-primary w-100 py-2" type="submit" value="Register">Зарегистрироваться</button><br><br><br>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <p class="targetff">{{ message }}</p><br>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+  </form>
+</main>
+
+<script type="text/javascript" src="static/js/jquery.inputmask.bundle.js"></script>
+<script type="text/javascript" src="static/js/jquery.maskedinput.min.js"></script>
+<script type="text/javascript" src="static/js/jquery.inputmask.bundle.js"></script>
+<script>
+    $(document).ready(function() {
+        $("#phone").mask("+7 (999) 999-99-99");
+    });
+
+    $.fn.setCursorPosition = function(pos) {
+        if ($(this).get(0).setSelectionRange) {
+        $(this).get(0).setSelectionRange(pos, pos);
+        } else if ($(this).get(0).createTextRange) {
+        var range = $(this).get(0).createTextRange();
+        range.collapse(true);
+        range.moveEnd('character', pos);
+        range.moveStart('character', pos);
+        range.select();
+    }};
+
+    $('input[name="phone"]').click(function(){
+        $(this).setCursorPosition(4);  // set position number
+    });
+</script>
+
+<script>
+    $('input[name="email"]').click(function(){
+            $("input#email").inputmask({
+                mask: "*{1,20}[_]*{0,20}[_]*{0,20}[_]*{0,20}@*{3,20}.*{2,7}",
+                showMaskOnFocus: false,
+                clearIncomplete: true,
+                showMaskOnHover: false
+            });
+        });
+</script>
+
+{% endblock %}

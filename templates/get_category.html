@@ -1,0 +1,36 @@
+<div class="form-floating">
+    <input type="text" class="form-control" value="{{ selected_cat.title }}"
+           name="title" id="title" placeholder="Название" required><br>
+    <label for="title">Новое название</label>
+</div>
+<input hidden="hidden" value="{{ selected_cat.parent }}" id="get">
+<div id="example-select"></div><br><br>
+    {% for el in cats %}
+    <input class="options_for_select" hidden="hidden" id="{{ el.id }}" value="{{ el.title }}">
+    {% endfor %}
+<script>
+        var elements = document.querySelectorAll('.options_for_select');
+    var lst = [{value: 0, label: 'Без родителя',
+                description: 'Категория будет считаться одной из "основных"'}];
+    elements.forEach(el => {
+        Option = {value: $(el).attr('id'), label: $(el).val()};
+        lst.push(Option);
+    });
+        VirtualSelect.init({
+  ele: '#example-select',
+  hasOptionDescription: true,
+  options: lst,
+  search: true,
+  name: 'parent',
+  placeholder: 'Выберите нового родителя',
+  multiple: false,
+  optionsCount: 4,
+  optionHeight: '60%',
+  selectedValue: $('#get').val(),
+  required: true,
+  maxWidth: '100%',
+  noOptionsText: 'Пока что категорий нет...',
+  noSearchResultsText: 'Ничего не найдено',
+  searchPlaceholderText: 'Поиск...',
+});
+</script>

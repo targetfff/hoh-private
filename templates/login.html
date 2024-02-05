@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Вход</title>
+{% endblock %}
+
+{% block body %}
+<main class="form-signin w-100 m-auto">
+  <form method="POST">
+    <h1>Вход</h1><br>
+
+    <div class="form-floating">
+      <input type="text" class="form-control" name="email" id="email" placeholder="name@example.com" required>
+      <label for="email">Адрес электронной почты</label>
+    </div><br>
+
+    <div class="form-floating">
+      <input type="password" class="form-control" id="password" name="password" placeholder="Пароль" required>
+      <label for="password">Пароль</label>
+    </div>
+
+    <div class="form-check text-start my-3">
+      <input class="form-check-input" type="checkbox" value="remember-me" id="flexCheckDefault" name="remember_me">
+      <label class="form-check-label" for="flexCheckDefault">
+        Запомнить меня
+      </label>
+    </div>
+
+    <button class="btn btn-primary w-100 py-2" type="submit" value="Login">Войти</button><br><br><br>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <p class="targetff">{{ message }}</p><br>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+  </form>
+</main>
+
+<script type="text/javascript" src="static/js/jquery.inputmask.bundle.js"></script>
+
+<script>
+    $('input[name="email"]').click(function(){
+            $("input#email").inputmask({
+                mask: "*{1,20}[_]*{0,20}[_]*{0,20}[_]*{0,20}@*{3,20}.*{2,7}",
+                showMaskOnFocus: false,
+                clearIncomplete: true,
+                showMaskOnHover: false
+            });
+        });
+</script>
+{% endblock %}

@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>главная</title>
+<script src="https://kit.fontawesome.com/068f76ea97.js" crossorigin="anonymous"></script>
+<style>
+  .none_vendors {display: none;}
+  .none {display: none;}
+  .listing {
+    max-width: 100%;
+    width: 100%;
+    padding-left: 1em}
+  .filter_block {
+    max-width: 100%;
+    float: left;
+    background-color: #fff;
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -o-sticky;
+    position: -ms-sticky;
+    position: sticky;
+    height: auto;
+    align-self: flex-start;
+    top: 1em;
+    left: 0;
+    padding: 1em;
+    border-radius: 12px;
+  }
+  .container_index {
+    max-width: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+  }
+  .filter_header {
+    font-weight: 500;
+    font-size: 140%;
+  }
+  .scrollable_checkboxes {
+    display: block;
+    width: 100%;
+    overflow-y: scroll;
+    height: 13em;
+  }
+.scrollable_checkboxes input[type="checkbox"] {
+  display: none;
+}
+
+label {
+    padding: 6px;
+    padding-right: 0px;
+	cursor: pointer;
+	font-weight: 400;
+}
+
+.scrollable_checkboxes input[type="checkbox"] + label:before {
+  border: 1px solid #e4e9ed;
+  content: "\00a0"; /* No break space */
+  display: inline-block;
+  font: 16px/1em sans-serif;
+  height: 16px;
+  width: 16px;
+  padding: 0;
+  margin-right: .7em;
+  vertical-align: center;
+}
+
+.scrollable_checkboxes input[type="checkbox"]:checked + label:before {
+  background: #6ba45c;
+  color: #111;
+  content: "\2714";	/* Checkmark*/
+  text-align: center;
+}
+
+.scrollable_checkboxes input[type="checkbox"]:checked + label {
+  text-shadow: 0 0 0.05px black;
+}
+
+.inner {
+  transition: all 1s;
+
+}
+
+.pre-animation {
+  opacity: 0;
+  max-height: 0px;
+  pointer-events: none;
+}
+.pad_left {
+  padding-left: 10px;
+  opacity:1;
+  max-height: 300px;
+}
+.fa {cursor: pointer; transition: transform .75s} /* adjust to your needs */
+.rotate {transform: rotate(180deg)}
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container_index">
+  <div class="container filter_block">
+    <input id="inners_count" value="{{ inners }}" hidden="hidden">
+    <p class="filter_header mb-2">Категории</p>
+    <div class="scrollable_checkboxes" id="scrollable_checkboxes_cats">
+      {% for cat in cats %}
+      <input type="checkbox" class="cat_checkbox" id="cat{{ cat[0].id }}"/>
+      {% if cat[1] %}
+      <label for="cat{{ cat[0].id }}" id="label_cat{{ cat[0].id }}">{{ cat[0].title }}</label>
+      <i id="_cat{{ cat[0].id }}" class="fa fa-plus"></i>
+      <br />
+      <div class="inner pre-animation for_inner_cat{{ cat[0].id }}"></div>
+      {% else %}
+      <label for="cat{{ cat[0].id }}">{{ cat[0].title }}</label> <br />
+      {% endif %}
+      {% endfor %}
+    </div>
+    <p class="filter_header mt-2">Цена</p>
+    <div class="priceForm form-group mb-4" style="float:left; display:flex; width:100%">
+      <input class="form-control me-2" type="text" onkeypress="return isNumberKey(event)"
+             placeholder="от" name="start" id="start">
+      <input class="form-control" type="text" onkeypress="return isNumberKey(event)"
+             placeholder="до" name="end" id="end">
+    </div>
+    <p class="filter_header">Продавец</p>
+    <div class="scrollable_checkboxes mb-4" id="scrollable_checkboxes_vendors">
+      {% for ven in vendors %}
+      <input type="checkbox" id="ven{{ ven.id }}" class="cat_checkbox"/>
+      {% if ven.title %}
+      <label for="ven{{ ven.id }}">{{ ven.title }} </label> <br />
+      {% else %}
+      <label for="ven{{ ven.id }}">{{ ven.name + ' ' + ven.surname }}</label> <br />
+      {% endif %}
+      {% endfor %}
+    </div>
+    </div>
+<div class="container listing">
+  <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+  {% for el in data %}
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm" id="prod{{ el.id }}">
+          <div class="card-header py-3">
+            <h2 class="my-0 fw-normal">{{ el.title }}</h2>
+          </div>
+          <div class="card-body">
+            {% if el.images %}
+            {% set a = el.images.strip('"[').strip(']"').replace("'", "").replace(",", "").split()[0] %}
+            <a href="#"> <img class="img-fluid" src="static/img/{{ a }}" alt="{{ a }}"></a>
+            {% endif %}
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>от {{ el.price }} руб.</li>
+              <li>{{ el.description }}</li>
+              <li data-vendors="{{ el.vendors }}" data-cats="{{ el.cat }}" data-price="{{ el.price }}" class="vendors_li">
+                {% if el.main_logo %}
+              <a href="/cart"> <img width="30" height="30" src="/static/img/{{ el.main_logo }}"
+                                    alt="{{ el.main_logo }}"></a>
+                {% endif %}
+                Продавец {{ el.vendor }}</li>
+              <li>
+                {% if el.logos %}
+                {% set b = el.logos.strip('"[').strip(']"').replace("'", "").split() %}
+                {% for i in b %}
+                {% set logo = i.strip(',') %}
+                <a href="#"><img src="/static/img/{{ logo }}" alt="{{ logo }}" width="30" height="30"></a>
+                {% endfor %}
+                {% endif %}
+              </li>
+            </ul>
+            <button type="button" class="w-100 btn btn-lg btn-outline-primary">В корзину (от {{ el.vendor }})</button>
+            <p></p>
+            <button type="button" class="w-100 btn btn-lg btn-outline-primary">Подробнее</button>
+          </div>
+        </div>
+      </div>
+  {% endfor %}
+  </div>
+  </div>
+  </div>
+<button id="btn_hidden" hidden="hidden" type="button" data-bs-toggle="modal" data-bs-target="#myModal"></button>
+<div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content col-xl-offset-2 col-xl-offset-2 col-xl-8">
+                <div class="modal-header">
+                    <h5 class="modal-title">Реклама</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>тут медиафайл</p>
+                    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+  function isNumberKey(evt) {
+  var charCode = (evt.which) ? evt.which : evt.keyCode
+  if (charCode > 31 && (charCode < 48 || charCode > 57))
+    return false;
+  return true;
+}
+//$(function() {
+  //  $('#btn_hidden').click();
+//});
+</script>
+<script>
+  $(document).on("click", ".cat_checkbox", function() {
+        var cats = [];
+        $('#scrollable_checkboxes_cats input:checked').each(function() {
+            cats.push(Number(this.id.slice(3)));
+        });
+        var vend = [];
+        $('#scrollable_checkboxes_vendors input:checked').each(function() {
+            vend.push(Number(this.id.slice(3)));
+        });
+        $('.vendors_li').each(function() {
+          vendors = this.getAttribute('data-vendors').slice(1, -1).split(', ');
+          categories = this.getAttribute('data-cats').split(' ');
+          console.log(categories);
+          set1 = new Set(vendors);
+          set2 = new Set(vend);
+          set3 = new Set(categories);
+          set4 = new Set(cats);
+          intersection = [...set1].filter(x => set2.has(Number(x)));
+          intersection2 = [...set3].filter(x => set4.has(Number(x)));
+          if ((intersection.length > 0 || vend.length == 0) && (intersection2.length > 0 || cats.length == 0)) {
+              this.closest('.col').classList.remove("none_vendors");
+          }
+          else {
+              this.closest('.col').classList.add("none_vendors");
+          }
+        var event = new Event('input');
+        $(".priceForm input")[0].dispatchEvent(event);
+      });
+  });
+</script>
+<script>
+  $(document).on("click", ".fa-minus", function() {
+        var data = $('#label' + $(this).attr('id')).attr('for');
+        var class_needed = '.for_inner_' + data;
+        var container = $(class_needed);
+        container.removeClass('pad_left');
+        container.addClass('pre-animation');
+        $(this).toggleClass('fa-minus fa-plus rotate');
+        setTimeout(function () {container.html('');}, 900)
+  });
+  $(document).on("click", ".fa-plus", function() {
+        var data = $('#label' + $(this).attr('id')).attr('for');
+        var class_needed = '.for_inner_' + data;
+        var container = $(class_needed);
+        $(this).preventDefault
+                    functABC(data).then(response =>
+                        functDEF(response, container));
+
+        $(this).toggleClass('fa-minus fa-plus rotate');
+  });
+  function functABC(data){
+            return $.ajax({
+                    data : { cat_id: data, },
+                    type : 'POST',
+                    url : '/get_cat_html'
+                });
+        }
+        functDEF = function (resp, container) {
+            container.html(resp);
+            setTimeout(function () {
+            container.addClass('pad_left');
+            container.removeClass('pre-animation');;
+            }, 200)
+        }
+</script>
+<script>
+  $(".priceForm input").on("input", function() {
+      start = Number($("#start").val());
+      end = Number($("#end").val());
+      if (!end) end = 9999999999;
+      if (!start) start = -1;
+      $('.vendors_li').each(function() {
+          price = Number(this.getAttribute('data-price'));
+          if ((start > price) || (price > end)) {
+              this.closest('.col').classList.add("none");
+          }
+          else if ((start <= price) && (price <= end)) {
+              this.closest('.col').classList.remove("none");
+          }
+      });
+  });
+</script>
+{% endblock %}

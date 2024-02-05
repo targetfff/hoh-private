@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Изменение товара</title>
+<link href="static/css/DynamicSelect.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Изменение товара</h1><br>
+    <form id="myForm" method="post" enctype="multipart/form-data">
+        <h3 style="font-weight: normal;">Выберите товар</h3><br>
+        <select class="form-control" id="product_to_change" name="product_to_change"
+                 data-placeholder="Выберите товар" data-dynamic-select required>
+            {% for el in data %}
+            <option value="{{ el.id }}" class="form-control"
+                    data-img="static/img/{{ el.main_image }}">{{ el.title }}</option>
+            {% endfor %}
+        </select><br>
+        <div id="mainList">
+        <div class="form-floating">
+            <input type="text" class="form-control" value="{{ data[0].title }}"
+                   name="title" id="title" placeholder="Название" required><br>
+            <label for="title">Название</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" value="{{ data[0].cat }}"
+                   name="cat" id="cat" placeholder="Категории" required><br>
+            <label for="cat">Категории</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" value="{{ data[0].description }}" name="description" id="description"
+                   required placeholder="Краткое описание"><br>
+            <label for="description">Краткое описание</label>
+        </div>
+        <div class="form-floating">
+            <textarea class="form-control" name="full_description" id="full_description"
+                      placeholder="Полное описание">{{ data[0].full_description }}</textarea><br>
+            <label for="full_description">Полное описание</label>
+        </div>
+        <label for="main_image">Главное изображение:</label><br><br>
+        <input type="file" accept="image" name="main_image" id="main_image"><br><br>
+        <label for="images">Дополнительные изображения:</label><br><br>
+        <input type="file" multiple="multiple" accept="image" name="images[]" id="images"><br><br>
+        </div>
+        <button type="submit" style="font-size: 20px;" class="btn btn-outline-success">Принять изменения</button>
+        <a style="font-size: 20px;" class="ms-2 btn btn-outline-primary" href="/account">Вернуться</a>
+    </form>
+    <script src="static/js/DynamicSelect.js"></script>
+</div>
+    <script>
+        $('#product_to_change').on('click', function(){
+            $(this).preventDefault
+                $('#myForm').preventDefault
+                functABC().then(response =>
+                functDEF(response))
+            });
+        function functABC(){
+            var data1 = $('#myForm').serialize();
+            return $.ajax({
+                    data : data1,
+                    type : 'POST',
+                    url : '/process_list',
+                });
+        }
+        function functDEF(resp){
+            $('#mainList').html(resp)
+            $("textarea").each(function () {
+            this.setAttribute("style", "height:" + (this.scrollHeight) + "px;overflow-y:hidden;");
+            }).on("input", function () {
+            this.style.height = 0;
+            this.style.height = (this.scrollHeight) + "px";
+        });
+        }
+        $("textarea").each(function () {
+            this.setAttribute("style", "height:" + (this.scrollHeight) + "px;overflow-y:hidden;");
+            }).on("input", function () {
+            this.style.height = 0;
+            this.style.height = (this.scrollHeight) + "px";
+        });
+    </script>
+{% endblock %}

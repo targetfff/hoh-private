@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+		<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<link href="static/css/targetff.css" rel="stylesheet" type="text/css"/>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+		<script type="text/javascript"
+				src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    	<script type="text/javascript"
+				src="https://cdn.rawgit.com/prashantchaudhary/ddslick/master/jquery.ddslick.min.js" ></script>
+		<style>
+			.dd-selected{
+				color:black;
+			}
+			.icon-ok{
+				background: url('static/img/logo.jpg') no-repeat;
+				background-size: 20%;
+				background-position: 99% center;
+				}
+			.icon-error{
+				background: url('static/img/logo.jpg') no-repeat;
+				background-size: 20%;
+				background-position: 99% center;}
+		</style>
+		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+	</head>
+
+	<script type="text/javascript" lang="javascript">
+		$(document).ready(function() {
+
+    	$('#select').click(function() {
+        var H = $(this).children().height();
+        alert(H);
+    	});
+
+		});
+		// Функция очистки класса
+		function cleanSelect (select) {
+			// Очищаем от стилей
+			return $(select).removeClass('icon-ok').removeClass('icon-error')
+		}
+		
+		// Формируем select и его обработчики
+		function formSelect() {
+			// получаем выпадающий список с уже очищенными классами
+            var select = cleanSelect('.select-events');
+
+			// Добавляем класс, который соответствует выбранному элементу
+            select.addClass(select.val() == '1' ? 'icon-ok' : 'icon-error');
+
+			// Добавляем стили, чтобы у списка не было видно полосы прокрутки
+            select.css({ height: 'auto', overflow: 'hidden', zIndex: '40000' });
+        }
+
+		// После загрузки DOM - получаем список
+		$(function () {
+			formSelect();
+		});
+		
+	</script>
+
+	<body>
+		<div class="clear"></div>
+		<div class="content">
+			<form method="post" enctype="multipart/form-data">
+				<label>Некая пользовательская настройка (мультисписок на основе css)</label>
+				<br/><br/>
+				<select class="select-multi form-control" size="2">
+					<option value="1" class="icon-ok">Вкл.</option>
+					<option value="0" class="icon-error">Выкл.</option> 
+				</select>
+			</form>
+		</div>
+		<div class="clear"></div>
+		<div class="clear"></div>
+		<div class="content">
+			<select id="demo-htmlselect">
+        <option value="0" data-imagesrc="https://i.imgur.com/XkuTj3B.png"
+            data-description="Description with Facebook">Facebook</option>
+        <option value="1" data-imagesrc="https://i.imgur.com/8ScLNnk.png"
+            data-description="Description with Twitter">Twitter</option>
+        <option value="2" selected="selected" data-imagesrc="https://i.imgur.com/aDNdibj.png"
+            data-description="Description with LinkedIn">LinkedIn</option>
+        <option value="3" data-imagesrc="https://i.imgur.com/kFAk2DX.png"
+            data-description="Description with Foursquare">Foursquare</option>
+    </select>
+			<script>
+				$('#demo-htmlselect').ddslick({
+    onSelected: function(selectedData){
+        //callback function: do something with selectedData;
+    }
+});
+			</script>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Удаление товара</title>
+<link href="static/css/DynamicSelect.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Удаление товара</h1><br>
+    <form id="myForm" method="post" enctype="multipart/form-data">
+        <h3 style="font-weight: normal;">Выберите товар</h3><br>
+        <select class="form-control" id="product_to_delete" name="product_to_delete"
+                 data-placeholder="Выберите товар" data-dynamic-select required>
+            {% for el in data %}
+            <option value="{{ el.id }}" class="form-control"
+                    data-img="static/img/{{ el.main_image }}">{{ el.title }}</option>
+            {% endfor %}
+        </select><br>
+    </form>
+    <script src="static/js/DynamicSelect.js"></script>
+    <button type="button" style="font-size: 20px;" class="btn btn-outline-danger"
+            data-bs-toggle="modal" data-bs-target="#myModal">Удалить</button>
+    <a style="font-size: 20px;" class="ms-2 btn btn-outline-primary" href="/account">Вернуться</a>
+</div>
+<div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content col-md-offset-2 col-md-offset-2 col-md-8">
+                <div class="modal-header">
+                    <h5 class="modal-title">Подтвердите удаление товара</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Отмена</button>
+                    <a href="/delete" class="delete_button btn btn-outline-danger">Удалить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            $('.delete_button').on('click', function(){
+            var data1 = $('#myForm').serialize();
+                $.ajax({
+                    data : data1,
+                    type : 'POST',
+                    url : '/delete'
+                });
+                $(this).preventDefault
+            });
+            return false;
+        });
+    </script>
+{% endblock %}

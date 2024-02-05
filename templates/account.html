@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Личный кабинет</title>
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
+<style>
+   .targetff {
+    font-size: 14pt;
+   }
+</style>
+
+{% endblock %}
+
+{% block body %}
+<div class="container">
+{% if user.status == 'admin' %}
+<link href="static/css/AdminDynamicSelect.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="static/css/PopUpPhotos.css">
+<h1>Администрация МОХ</h1><br>
+<h4 class="mb-4">Управление базой товаров</h4>
+<a class="me-2 btn btn-outline-primary" href="/create" style="font-size: 20px">Добавить товар</a>
+<a class="me-2 btn btn-outline-primary" href="/delete" style="font-size: 20px">Удалить товар</a>
+<a class="me-2 btn btn-outline-primary" href="/change" style="font-size: 20px">Изменить товар</a><br><br>
+<a class="me-2 btn btn-outline-primary" href="/category" style="font-size: 20px">Добавить категорию</a>
+<a class="me-2 btn btn-outline-primary" href="/category_delete" style="font-size: 20px">Удалить категорию</a>
+<a class="me-2 btn btn-outline-primary" href="/category_change" style="font-size: 20px">Изменить категорию</a>
+
+<br><br>
+<h4>Заявки продавцов</h4><br>
+<h5>Заявки на торговлю</h5><br>
+<div class="popup">
+        <!-- top bar -->
+        <div class="top-bar">
+            <span class="close-btn" style="background: url(static/img/closebutton.png);"></span>
+        </div>
+        <!-- arrows -->
+        <button class="arrow-btn left-arrow"><img src="static/img/arrow.png" alt=""></button>
+        <button class="arrow-btn right-arrow"><img src="static/img/arrow.png" alt=""></button>
+        <!-- image -->
+        <img src="static/img/img1.png" class="large-image" alt="">
+        <!-- image-index -->
+        <h1 class="index">01</h1>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 2%; row-gap: 2%;">
+    {% for i in reqs_data %}
+        {% set ven = i[0] %}
+        {% set prod = i[1] %}
+        {% set req = i[2] %}
+    <div class="grid-item">
+    <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+        <div class="card-header py-3">
+            {% if ven.title %}
+            <p style="font-size: 20px" class="my-0 fw-normal">Заявка на торговлю от {{ ven.title }}</p>
+            {% else %}
+            <p style="font-size: 20px" class="my-0 fw-normal">Заявка на торговлю от {{ ven.name }}</p>
+            {% endif %}
+        </div><br>
+    <form id="admin_trading{{ req.id }}" method="post" enctype="multipart/form-data">
+        <select id="req_id" name="req_id" hidden required>
+            <option value="{{ req.id }}">{{ req.id }}</option>
+        </select>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="fio_to_access"
+                   id="fio_to_access" placeholder="ФИО" required readonly
+                   value="{{ ven.surname + ' ' + ven.name + ' ' + ven.patronymic }}"><br>
+            <label for="fio_to_access">ФИО продавца</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="email_to_access" id="email_to_access"
+                   placeholder="email" required readonly value="{{ ven.email }}"><br>
+            <label for="email_to_access">Электронная почта продавца</label>
+        </div>
+        <select class="form-control" id="product_to_access" name="product_to_access"
+                 data-placeholder="product_to_access" data-dynamic-select required>
+            <option value="{{ prod.id }}" class="form-control"
+                    data-img="static/img/{{ prod.main_image }}">{{ prod.title }}</option>
+        </select><br>
+        <select id="hidden" name="hidden" hidden required>
+            <option value="{{ prod.id }}">{{ prod.title }}</option>
+        </select>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="price_to_access" id="price_to_access"
+                   placeholder="Цена в рублях" required readonly value="{{ req.price }}"><br>
+            <label for="price_to_access">Цена (руб.)</label>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+            {% set photos = req.photos.strip('[').strip(']').replace("'", "").replace(",", "").split() %}
+            {% for photo in photos %}
+            <div class="gallery-image">
+                <img src="static/img/{{ photo }}" alt="" class="image">
+            </div>
+            {% endfor %}
+        </div><br>
+        <button class="submit btn btn-success" type="button">Принять заявку</button>
+        <button class="reject btn btn-danger" type="button">Отклонить заявку</button>
+    </form>
+    </div>
+    </div>
+    </div>
+    {% endfor %}
+    </div>
+    <script>
+        $(function() {
+            $('.submit').on('click', function(){
+                var frmID = $(this).closest("form").attr('id');
+                var frmDetails = $('#'+frmID);
+                var data1 = $(frmDetails).serialize();
+                $.ajax({
+                    data : data1,
+                    type : 'POST',
+                    url : '/submit'
+                });
+
+                $(this).preventDefault
+
+                $(this).closest(".grid-item").fadeOut(800, function() {
+                    $(this).closest(".grid-item").remove();
+                });
+            });
+            return false;
+        });
+
+        $(function() {
+            $('.reject').on('click', function(){
+                var frmID = $(this).closest("form").attr('id');
+                var frmDetails = $('#'+frmID);
+                var data1 = $(frmDetails).serialize();
+                $.ajax({
+                    data : data1,
+                    type : 'POST',
+                    url : '/reject'
+                });
+
+                $(this).preventDefault
+
+                $(this).closest(".grid-item").fadeOut(800, function() {
+                    $(this).closest(".grid-item").remove();
+                });
+            });
+            return false;
+        });
+    </script>
+    <script src="static/js/DynamicSelect.js"></script>
+    <script src="static/js/PopUpPhotos.js"></script>
+<br><br>
+<h5>Предложения по добавлению товаров</h5><br>
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 2%; row-gap: 2%;">
+    {% for i in sug_data %}
+        {% set ven = i[0] %}
+        {% set sug = i[1] %}
+    <div class="grid-item">
+    <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-body">
+        <div class="card-header py-3">
+            {% if ven.title %}
+            <p style="font-size: 20px" class="my-0 fw-normal">Предложение от {{ ven.title }}</p>
+            {% else %}
+            <p style="font-size: 20px" class="my-0 fw-normal">Предложение от {{ ven.name }}</p>
+            {% endif %}
+        </div><br>
+    <form id="admin_trading{{ sug.id }}" method="post" enctype="multipart/form-data">
+        <select id="sug_id" name="sug_id" hidden required>
+            <option value="{{ sug.id }}">{{ sug.id }}</option>
+        </select>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="fio_to_access2"
+                   id="fio_to_access2" placeholder="ФИО" required readonly
+                   value="{{ ven.surname + ' ' + ven.name + ' ' + ven.patronymic }}"><br>
+            <label for="fio_to_access2">ФИО продавца</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="email_to_access2" id="email_to_access2"
+                   placeholder="email" required readonly value="{{ ven.email }}"><br>
+            <label for="email_to_access2">Электронная почта продавца</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="title" id="title"
+                   placeholder="title" required readonly value="{{ sug.title }}"><br>
+            <label for="title">Предложенное название</label>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+            {% set photos = sug.photos.strip('[').strip(']').replace("'", "").replace(",", "").split() %}
+            {% for photo in photos %}
+            <div class="gallery-image">
+                <img src="static/img/{{ photo }}" alt="" class="image">
+            </div>
+            {% endfor %}
+        </div><br>
+        <button class="submit2 btn btn-success" type="button">Принять заявку</button>
+        <button class="reject2 btn btn-danger" type="button">Отклонить заявку</button>
+    </form>
+    </div>
+    </div>
+    </div>
+    {% endfor %}
+    </div>
+<script>
+        $(function() {
+            $('.submit2').on('click', function(){
+                var frmID = $(this).closest("form").attr('id');
+                var frmDetails = $('#'+frmID);
+                var data1 = $(frmDetails).serialize();
+                $.ajax({
+                    data : data1,
+                    type : 'POST',
+                    url : '/submit2'
+                });
+
+                $(this).preventDefault
+
+                $(this).closest(".grid-item").fadeOut(800, function() {
+                    $(this).closest(".grid-item").remove();
+                });
+            });
+            return false;
+        });
+
+        $(function() {
+            $('.reject2').on('click', function(){
+                var frmID = $(this).closest("form").attr('id');
+                var frmDetails = $('#'+frmID);
+                var data1 = $(frmDetails).serialize();
+                $.ajax({
+                    data : data1,
+                    type : 'POST',
+                    url : '/reject2'
+                });
+
+                $(this).preventDefault
+
+                $(this).closest(".grid-item").fadeOut(800, function() {
+                    $(this).closest(".grid-item").remove();
+                });
+            });
+            return false;
+        });
+    </script>
+<br>
+
+{% elif user.status == 'vendor' %}
+<link href="static/css/DynamicSelect.css" rel="stylesheet" type="text/css">
+<h1>Личный кабинет</h1><br>
+    <div>
+    <div style="width: 30%; float:left">
+        {% if vendor.logo %}
+            <img src="static/img/{{ vendor.logo }}" align="left" vspace="5" hspace="5" width="100%">
+        {% else %}
+            <img src="static/img/570238.png" align="left" vspace="5" hspace="5" width="100%">
+        {% endif %}
+    </div>
+
+    <div style="width: 70%; float:right; padding: 0px 35px">
+        <h3 class="my-0 fw-normal">{{ vendor.title }}</h3><br>
+        <h4 class="my-0 fw-normal">{{ vendor.surname + ' ' + vendor.name + ' ' + vendor.patronymic }}</h4><br>
+        <form id="vendor_change" method="post" enctype="multipart/form-data">
+            <div class="form-floating">
+                {% if vendor.title %}
+                <input type="text" class="form-control" value="{{ vendor.title }}"
+                       name="new_title" id="new_title" placeholder="Имя"><br>
+                <label for="new_title">Изменить название</label>
+                {% else %}
+                <input type="text" class="form-control" value="{{ vendor.title }}"
+                       name="new_title" id="new_title2" placeholder="Имя"><br>
+                <label class="targetff" for="new_title2">Добавить название</label>
+                {% endif %}
+            </div>
+            {% if vendor.logo %}
+            <label class="targetff" for="new_logo">Изменить логотип:</label><br><br>
+            <input type="file" accept="image" name="new_logo" id="new_logo"><br><br>
+            {% else %}
+            <label class="targetff" for="new_logo">Добавить логотип:</label><br><br>
+            <input type="file" accept="image" name="new_logo" id="new_logo2"><br><br>
+            {% endif %}
+            <button class="btn btn-outline-success" type="submit">Изменить</button>
+        </form>
+    </div>
+    </div>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <h3 style="margin-top:15px">Торговля</h3><br>
+    <h4>Заявка на торговлю товаром</h4><br>
+    <p class="targetff">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis imperdiet massa tincidunt nunc pulvinar. Justo laoreet sit amet cursus sit amet dictum sit. Facilisi etiam dignissim diam quis enim lobortis. Tristique nulla aliquet enim tortor at auctor urna nunc. At consectetur lorem donec massa sapien. Dictum non consectetur a erat nam at lectus. Mattis enim ut tellus elementum sagittis vitae. Sodales ut etiam sit amet nisl purus. Rhoncus aenean vel elit scelerisque mauris pellentesque. At consectetur lorem donec massa sapien faucibus. Amet luctus venenatis lectus magna fringilla urna porttitor rhoncus dolor. Pellentesque dignissim enim sit amet venenatis urna cursus eget.
+    </p><br>
+    <form id="vendor_trading" method="post" enctype="multipart/form-data">
+         <select class="form-control" id="product_to_request" name="product_to_request"
+                 data-placeholder="Выберите товар" data-dynamic-select required>
+            {% for el in data %}
+            <option value="{{ el.id }}" class="form-control"
+                    data-img="static/img/{{ el.main_image }}">{{ el.title }}</option>
+            {% endfor %}
+        </select><br>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="price" id="price"
+                   placeholder="Цена в рублях" required><br>
+            <label for="price">Введите цену (руб.)</label>
+        </div>
+        <label class="targetff" for="images">Добавьте фотографии товара:</label><br><br>
+        <input type="file" multiple="multiple" required accept="image" name="images[]" id="images"><br><br>
+        <button class="btn btn-outline-success" type="submit">Оплатить и отправить заявку</button>
+    </form><br><br><br>
+    <script src="static/js/DynamicSelect.js"></script>
+    <h4>Заявка на добавление товара</h4><br>
+    <p class="targetff">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis imperdiet massa tincidunt nunc pulvinar. Justo laoreet sit amet cursus sit amet dictum sit. Facilisi etiam dignissim diam quis enim lobortis. Tristique nulla aliquet enim tortor at auctor urna nunc.
+    </p><br>
+    <form id="vendor_product" method="post" enctype="multipart/form-data">
+        <div class="form-floating">
+            <input type="text" class="form-control" name="product_title" id="product_title"
+                   placeholder="Название" required><br>
+            <label for="product_title">Введите название</label>
+        </div>
+        <label class="targetff" for="images2">Добавьте изображения товара:</label><br><br>
+        <input required type="file" multiple="multiple" accept="image" name="images2[]" id="images2"><br><br>
+        <button class="btn btn-outline-success" type="submit">Отправить заявку</button>
+    </form><br><br><br>
+    <h3>Мессенджер</h3><br>
+
+{% else %}
+
+<h1>Личный кабинет</h1><br>
+<h3>История просмотра</h3><br>
+
+<div class="swiper mySwiper container">
+      <div class="swiper-wrapper">
+          {% for el in data*2 %}
+          <div class="swiper-slide">
+              <div class="col">
+                  <div class="card rounded-3 shadow-sm" style="width: 18rem;">
+                      <div class="card-header py-3">
+                          <h5 style="display:inline;" class="my-0 fw-normal">{{ el.title }}</h5>
+                      </div>
+                      <div class="card-body">
+                          {% set a = el.main_image %}
+                          <a href="#"> <img class="img-fluid" src="static/img/{{ a }}" alt="{{ a }}"></a><br><br>
+                          <button type="button" class="w-100 btn btn-lg btn-outline-primary" style="font-size :18px;">
+                              от {{ el.price }} руб.
+                          </button>
+                      </div>
+                  </div>
+              </div>
+        </div>
+        {% endfor %}
+      </div>
+      <br>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+    </div><br>
+
+    <!-- Swiper JS -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+    <!-- Initialize Swiper -->
+    <script>
+      var swiper = new Swiper(".mySwiper", {
+        slidesPerView: 4,
+        spaceBetween: 40,
+        slidesPerGroup: 4,
+        loop: true,
+        loopFillGroupWithBlank: true,
+        pagination: {
+          el: ".swiper-pagination",
+          clickable: true,
+        },
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev",
+        },
+      });
+    </script>
+
+    <h3>Мессенджер</h3><br>
+
+
+{% endif %}
+</div>
+{% endblock %}
+

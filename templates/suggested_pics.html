@@ -1,0 +1,13 @@
+<div class="form-floating">
+    <input type="text" class="form-control" name="title" id="title"
+           placeholder="Название" value="{{ suggested.title }}" required><br>
+    <label for="title">Название</label>
+</div>
+<div style="display: grid; grid-template-columns: repeat(6, 1fr);">
+    {% set photos = suggested.photos.strip('[').strip(']').replace("'", "").replace(",", "").split() %}
+    {% for photo in photos %}
+    <div style="cursor: default;" class="gallery-image">
+        <img src="static/img/{{ photo }}" alt="" class="image">
+    </div>
+    {% endfor %}
+</div><br>

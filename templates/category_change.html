@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Добавление категории</title>
+<script src="static/js/virtual-select.js"></script>
+<link href="static/css/virtual-select.min.css" rel="stylesheet" type="text/css">
+<link href="static/css/MyChoices.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="mb-4">Изменение категории</h1>
+    <form method="post" enctype="multipart/form-data">
+        <div id="example-select2"></div><br><br>
+        {% for el in cats %}
+        <input class="options_for_select2" hidden="hidden" id="s{{ el.id }}" value="{{ el.title }}">
+        {% endfor %}
+        <div class="title_and_parent">
+        <div class="form-floating">
+            <input type="text" class="form-control" name="title" id="title" placeholder="Название" required><br>
+            <label for="title">Новое название</label>
+        </div>
+        <div id="example-select"></div><br><br>
+        {% for el in cats %}
+        <input class="options_for_select" hidden="hidden" id="{{ el.id }}" value="{{ el.title }}">
+        {% endfor %}
+        <script src="static/js/MyChoices3.js"></script></div>
+        <button style="font-size: 20px;" class="btn btn-outline-success" type="submit">Принять изменения</button>
+        <a style="font-size: 20px;" class="ms-2 btn btn-outline-primary" href="/account">Вернуться</a><br><br>
+    </form>
+</div>
+<script>
+    $('#example-select2').on('change', function() {
+        $(this).preventDefault
+                functABC1().then(response =>
+                functDEF1(response))
+            });
+    function functABC1(){
+            return $.ajax({
+                    data : {cat : $('#example-select2').val()},
+                    type : 'POST',
+                    url : '/get_category'
+                });
+        }
+    function functDEF1(resp){
+            $('.title_and_parent').html(resp)
+    };
+</script>
+{% endblock %}

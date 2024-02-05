@@ -1,0 +1,25 @@
+<div id="mainList">
+<div class="form-floating">
+            <input type="text" class="form-control" value="{{ data.title }}"
+                   name="title" id="title" placeholder="Название" required><br>
+            <label for="title">Название</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" value="{{ data.brand }}"
+                   name="brand" id="brand" placeholder="Бренд" required><br>
+            <label for="brand">Бренд</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" value="{{ data.description }}" name="description" id="description"
+                   required placeholder="Краткое описание"><br>
+            <label for="description">Краткое описание</label>
+        </div>
+        <div class="form-floating">
+            <textarea class="form-control" name="full_description" id="full_description"
+                      placeholder="Полное описание">{{ data.full_description }}</textarea><br>
+            <label for="full_description">Полное описание</label>
+        </div></div>
+        <label for="main_image">Главное изображение:</label><br><br>
+        <input type="file" accept="image" name="main_image" id="main_image"><br><br>
+        <label for="images">Дополнительные изображения:</label><br><br>
+        <input type="file" multiple="multiple" accept="image" name="images[]" id="images"><br><br>

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Добавление товара</title>
+<link rel="stylesheet" href="static/css/PopUpPhotos.css">
+<script src="static/js/virtual-select.js"></script>
+<link href="static/css/virtual-select.min.css" rel="stylesheet" type="text/css">
+<link href="static/css/MyChoices.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="mb-4">Добавление товара</h1>
+    <h3 style="font-weight: normal" class="mb-4">Предложения</h3>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); column-gap: 2%; row-gap: 2%;">
+        {% for i in sug %}
+        <button class="suggest me-2 btn btn-outline-secondary" id="{{ i.id }}" style="font-size: 18px">{{ i.title }}</button>
+        {% endfor %}
+        <button class="discard me-2 btn btn-outline-danger" style="font-size: 18px">Сбросить Выбранное</button>
+    </div><br>
+    <form method="post" enctype="multipart/form-data">
+        <div class="title_and_pics"><div class="form-floating">
+            <input type="text" class="form-control" name="title" id="title" placeholder="Название" required><br>
+            <label for="title">Название</label>
+        </div></div>
+        <select id="hidden" name="hidden" hidden required>
+            <option value="0">0</option>
+        </select>
+        <div id="example-select"></div><br><br>
+        {% for el in cats %}
+        <input class="options_for_select" hidden="hidden" id="{{ el.id }}" value="{{ el.title }}">
+        {% endfor %}
+        <script src="static/js/MyChoices.js"></script>
+        <div class="form-floating">
+            <input type="text" class="form-control" name="description" id="description" required placeholder="Краткое описание"><br>
+            <label for="description">Краткое описание</label>
+        </div>
+        <div class="form-floating">
+            <textarea class="form-control" name="full_description" id="full_description" placeholder="Полное описание"></textarea><br>
+            <label for="full_description">Полное описание</label>
+        </div>
+
+        <label for="main_image">Добавьте главное изображение:</label><br><br>
+        <input type="file" accept="image" name="main_image" id="main_image" required><br><br>
+        <label for="images">Вы можете добавить дополнительные изображения:</label><br><br>
+        <input type="file" multiple="multiple" accept="image" name="images[]" id="images"><br><br>
+        <button style="font-size: 20px;" class="btn btn-outline-success" type="submit">Добавить товар</button>
+        <a style="font-size: 20px;" class="ms-2 btn btn-outline-primary" href="/account">Вернуться</a><br><br>
+    </form>
+
+</div>
+<script>
+    $('.suggest').on('click', function(){
+        var value = $(this).attr('id');
+        $('#hidden').find(":selected").val(value);
+            $(this).preventDefault
+                functABC(value).then(response =>
+                functDEF(response))
+            });
+        function functABC(value){
+            return $.ajax({
+                    data : { selected_sug: value, },
+                    type : 'POST',
+                    url : '/get_suggested'
+                });
+        }
+        function functDEF(resp){
+            $('.title_and_pics').html(resp);
+        }
+
+        $('.discard').on('click', function(){
+            $(this).preventDefault
+                functABC1().then(response =>
+                functDEF1(response))
+            });
+        function functABC1(){
+            return $.ajax({
+                    data : {},
+                    type : 'POST',
+                    url : '/discard'
+                });
+        }
+        function functDEF1(resp){
+            $('.title_and_pics').html(resp)
+            $('#hidden').find(":selected").val('0');
+        }
+
+        $("textarea").each(function () {
+            this.setAttribute("style", "height:" + (this.scrollHeight) + "px;overflow-y:hidden;");
+            }).on("input", function () {
+            this.style.height = 0;
+            this.style.height = (this.scrollHeight) + "px";
+        });
+</script>
+{% endblock %}
+

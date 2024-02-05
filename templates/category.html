@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Добавление категории</title>
+<script src="static/js/virtual-select.js"></script>
+<link href="static/css/virtual-select.min.css" rel="stylesheet" type="text/css">
+<link href="static/css/MyChoices.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="mb-4">Добавление категории</h1>
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-floating">
+            <input type="text" class="form-control" name="title" id="title" placeholder="Название" required><br>
+            <label for="title">Название</label>
+        </div>
+        <div id="example-select"></div><br><br>
+        {% for el in cats %}
+        <input class="options_for_select" hidden="hidden" id="{{ el.id }}" value="{{ el.title }}">
+        {% endfor %}
+        <script src="static/js/MyChoices2.js"></script>
+        <button style="font-size: 20px;" class="btn btn-outline-success" type="submit">Добавить категорию</button>
+        <a style="font-size: 20px;" class="ms-2 btn btn-outline-primary" href="/account">Вернуться</a><br><br>
+    </form>
+</div>
+{% endblock %}

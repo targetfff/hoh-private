@@ -1,0 +1,60 @@
+.clear
+{
+	clear:both;
+}
+
+body
+{
+	width: 900px;
+	margin:auto;
+}
+
+hr
+{
+	width: 414px;
+	float: left;
+	clear:both;
+}
+
+.header
+{
+	height: 100px;
+	background: #8080E2;
+	color: white;
+	text-align: center;
+	font-size: 28px;
+	padding: 20px;
+}
+
+.header a
+{
+	color: white;
+}
+
+.content
+{
+	width: 100%;
+}
+
+.form
+{
+	padding: 20px;
+    border: 1px solid #eee;
+}
+
+select
+{
+	width: 200px;
+}
+
+option
+{
+	padding-left: 20px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+
+option:hover
+{
+	background-color: #eee;
+}
