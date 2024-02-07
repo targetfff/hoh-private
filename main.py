@@ -99,8 +99,20 @@ def rec(cats):
     return result
 
 
+def tree_find(e, t):
+    if e in t:
+        return t
+    for v in t.values():
+        r = tree_find(e, v)
+        if r:
+            return r
+    return None
+
+
 @app.route('/')
 def index():
+    prices = Offers.query.with_entities(Offers.price).all()
+    prices1 = [x[0] for x in prices]
     products = Products.query.filter(Products.price > 0).order_by(Products.date.desc()).all()
     vendors_with_offers_ids = Offers.query.with_entities(Offers.vendor_id).all()
     vendors = set()
@@ -108,25 +120,24 @@ def index():
         ven = Vendors.query.filter(Vendors.id == i[0]).first()
         vendors.add(ven)
     vendors = sorted(list(vendors), key=lambda x: (x.title, x.name, x.surname))
-    basic = Categories.query.filter(Categories.parent == 0).all()
     cats = []
     all_cats = Categories.query.all()
-    parents = [x[0] for x in Categories.query.filter(Categories.parent != 0).with_entities(Categories.parent).all()]
-    cats_with_fa_plus = len(set(parents))
-    for i in basic:
-        children = Categories.query.filter(Categories.parent == i.id).all()
-        if children:
-            cats.append((i, 1))
-        else:
-            cats.append((i, 0))
-    d = {}
+    parents = Categories.query.filter(Categories.parent == 0).all()
+    dict1 = {x: [] for x in parents}
     for i in all_cats:
-        if i.parent in d:
-            d[i.parent].append(i.id)
+        if i.parent == 0:
+            continue
+        parent = Categories.query.filter(Categories.id == i.parent).first()
+        if parent in dict1:
+            dict1[parent] += [i]
         else:
-            d[i.parent] = [i.id]
+            dict1[parent] = [i]
+    tree = {}
+    for k, v in dict1.items():
+        n = tree_find(k, tree)
+        (tree if not n else n)[k] = {e: {} for e in v}
     return render_template('index.html', cats=cats, data=products,
-                           vendors=vendors, inners=cats_with_fa_plus, d=d)
+                           vendors=vendors, tree=tree, all_prices=prices1)
 
 
 @app.route('/get_cat_html', methods=['POST', 'GET'])
@@ -145,9 +156,24 @@ def get_cat_html():
     return redirect('/')
 
 
+def kek():
+    pass
+
+
 @app.route('/product/<int:id>')
 def product(id):
-    return render_template('product.html')
+    this = Products.query.filter(Products.id == id).first()
+    ven = str(this.vendors).lstrip('[').rstrip(']').split(', ')
+    ven1 = []
+    ven_prices = {}
+    for i in ven:
+        ven1.append(Vendors.query.filter(Vendors.id == int(i)).first())
+        ven_prices[int(i)] = Offers.query.filter(Offers.vendor_id == int(i) and Offers.product_id == id).first().price
+    print(ven1)
+    print(ven_prices)
+    ven1.sort(key=lambda x: ven_prices[x.id])
+    print(ven1)
+    return render_template('product.html', product=this, vendors=ven1, ven_prices=ven_prices.items())
 
 
 @app.route('/cart')
@@ -299,7 +325,6 @@ def submit2():
         this = Suggestions.query.filter(Suggestions.id == sug_id).first()
         this.accepted = True
         db.session.commit()
-        print('submitted', this.id, this.title)
         return 'nothing'
     return redirect('/')
 
@@ -404,7 +429,6 @@ def account():
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                     uploaded_images.append(filename)
 
-            print(product_title, uploaded_images, sep='\n')
             new_request = Suggestions(title=product_title, vendor_id=vendor.id,
                                       photos=str(uploaded_images), date=datetime.datetime.now(), accepted=False)
             db.session.add(new_request)
@@ -557,9 +581,10 @@ def delete():
     if current_user.status != 'admin':
         return redirect('/')
     if request.method == 'POST':
-        product_to_delete = request.form['product_to_delete']
-        print(product_to_delete)
-        Products.query.filter(Products.id == int(product_to_delete)).delete()
+        product_to_delete = int(request.form['product_to_delete'])
+        Products.query.filter(Products.id == product_to_delete).delete()
+        Offers.query.filter(Offers.product_id == product_to_delete).delete()
+        Requests.query.filter(Requests.product_id == product_to_delete).delete()
         db.session.commit()
     products = Products.query.order_by(Products.date.desc()).all()
     return render_template('delete.html', data=products)
@@ -590,7 +615,7 @@ def change():
         images = request.files.getlist('images[]')
         main_image = request.files.get('main_image')
         uploaded_images = []
-        if images or main_image:
+        if images[0] or main_image:
             for file in images:
                 if file:
                     filename = secure_filename(file.filename)
@@ -605,7 +630,6 @@ def change():
                 main_image = uploaded_images[0]
             this.main_image = secure_filename(main_image)
             this.images = str(uploaded_images)
-        print(images, '\n', main_image)
 
         this.title = title
         this.cat = cat

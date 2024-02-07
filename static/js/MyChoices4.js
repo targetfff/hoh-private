@@ -1,24 +1,25 @@
     const elements = document.querySelectorAll('.options_for_select');
-    var lst = [{value: 0, label: 'Без родителя',
-                description: 'Категория будет считаться одной из "основных"'}];
+    var lst = [];
     elements.forEach(el => {
         Option = {value: $(el).attr('id'), label: $(el).val()};
         lst.push(Option);
     });
         VirtualSelect.init({
   ele: '#example-select',
-  hasOptionDescription: true,
+  hasOptionDescription: false,
   options: lst,
   search: true,
-  name: 'parent',
-  placeholder: 'Выберите родителя',
+  name: 'vendor',
+  placeholder: 'Выберите продавца',
   multiple: false,
   optionsCount: 4,
-  optionHeight: '60%',
+  optionHeight: '40%',
+  hideClearButton: true,
   required: true,
-  selectedValue: 0,
-  maxWidth: '100%',
-  noOptionsText: 'Пока что категорий нет...',
+  maxWidth: '80%',
+  selectedValue: lst[0]['value'],
+  dropboxWidth: '80%',
+  noOptionsText: 'Для данного товара пока нет продавцов',
   noSearchResultsText: 'Ничего не найдено',
   searchPlaceholderText: 'Поиск...',
 });

@@ -1,11 +1,38 @@
 {% extends 'base.html' %}
 
+{% macro render_tree(d) %}
+    <div style="transition: all 1s;"
+    {% if d != tree %}
+    class="pre-animation"
+    {% endif %}>
+    {% for key, value in d.items(): %}
+        <div>
+        <input type="checkbox" class="cat_checkbox" id="cat{{ key.id }}"/>
+        {% if value %}
+        <label for="cat{{ key.id }}">{{ key.title }}</label>
+        <i class="fa fa-plus"></i>
+        <br />
+        {{ render_tree(value) }}
+        {% else %}
+        <label for="cat{{ key.id }}">{{ key.title }}</label> <br />
+        {% endif %}
+        </div>
+    {% endfor %}
+    </div>
+{% endmacro %}
+
 {% block title %}
 <title>главная</title>
-<script src="https://kit.fontawesome.com/068f76ea97.js" crossorigin="anonymous"></script>
 <style>
-  .none_vendors {display: none;}
-  .none {display: none;}
+  .none_vendors {display: none !important;}
+  .none {display: none !important;}
+  .cian_none {color: #afafaf}
+  .cian_none:focus {
+      color: #afafaf !important;
+      border-color: #afafaf !important;
+      box-shadow: 0 0 0 .25rem rgba(175,175,175,.25) !important;
+      -webkit-box-shadow: box-shadow: 0 0 0 .25rem rgba(175,175,175,.25) !important;
+  }
   .listing {
     max-width: 100%;
     width: 100%;
@@ -22,8 +49,8 @@
     height: auto;
     align-self: flex-start;
     top: 1em;
-    left: 0;
     padding: 1em;
+    margin-bottom: 1em;
     border-radius: 12px;
   }
   .container_index {
@@ -78,7 +105,6 @@ label {
 
 .inner {
   transition: all 1s;
-
 }
 
 .pre-animation {
@@ -93,6 +119,10 @@ label {
 }
 .fa {cursor: pointer; transition: transform .75s} /* adjust to your needs */
 .rotate {transform: rotate(180deg)}
+.card {transition: box-shadow 0.5s;}
+.card:hover {
+    box-shadow: 0 5px 10px gray !important;
+}
 </style>
 {% endblock %}
 
@@ -103,17 +133,7 @@ label {
     <input id="inners_count" value="{{ inners }}" hidden="hidden">
     <p class="filter_header mb-2">Категории</p>
     <div class="scrollable_checkboxes" id="scrollable_checkboxes_cats">
-      {% for cat in cats %}
-      <input type="checkbox" class="cat_checkbox" id="cat{{ cat[0].id }}"/>
-      {% if cat[1] %}
-      <label for="cat{{ cat[0].id }}" id="label_cat{{ cat[0].id }}">{{ cat[0].title }}</label>
-      <i id="_cat{{ cat[0].id }}" class="fa fa-plus"></i>
-      <br />
-      <div class="inner pre-animation for_inner_cat{{ cat[0].id }}"></div>
-      {% else %}
-      <label for="cat{{ cat[0].id }}">{{ cat[0].title }}</label> <br />
-      {% endif %}
-      {% endfor %}
+      {{ render_tree(tree) }}
     </div>
     <p class="filter_header mt-2">Цена</p>
     <div class="priceForm form-group mb-4" style="float:left; display:flex; width:100%">
@@ -145,7 +165,7 @@ label {
           <div class="card-body">
             {% if el.images %}
             {% set a = el.images.strip('"[').strip(']"').replace("'", "").replace(",", "").split()[0] %}
-            <a href="#"> <img class="img-fluid" src="static/img/{{ a }}" alt="{{ a }}"></a>
+            <a href="/product/{{ el.id }}"> <img class="img-fluid" src="static/img/{{ a }}" alt="{{ a }}"></a>
             {% endif %}
             <ul class="list-unstyled mt-3 mb-4">
               <li>от {{ el.price }} руб.</li>
@@ -161,14 +181,14 @@ label {
                 {% set b = el.logos.strip('"[').strip(']"').replace("'", "").split() %}
                 {% for i in b %}
                 {% set logo = i.strip(',') %}
-                <a href="#"><img src="/static/img/{{ logo }}" alt="{{ logo }}" width="30" height="30"></a>
+                <a href="/product/{{ el.id }}"><img src="/static/img/{{ logo }}" alt="{{ logo }}" width="30" height="30"></a>
                 {% endfor %}
                 {% endif %}
               </li>
             </ul>
-            <button type="button" class="w-100 btn btn-lg btn-outline-primary">В корзину (от {{ el.vendor }})</button>
+            <a href="/product/{{ el.id }}" class="w-100 btn btn-lg btn-outline-primary">В корзину (от {{ el.vendor }})</a>
             <p></p>
-            <button type="button" class="w-100 btn btn-lg btn-outline-primary">Подробнее</button>
+            <a href="/product/{{ el.id }}" class="w-100 btn btn-lg btn-outline-primary">Подробнее</a>
           </div>
         </div>
       </div>
@@ -191,6 +211,7 @@ label {
             </div>
         </div>
     </div>
+<input hidden="hidden" value="{{ all_prices }}" id="prices_hidden">
 <script>
   function isNumberKey(evt) {
   var charCode = (evt.which) ? evt.which : evt.keyCode
@@ -201,6 +222,15 @@ label {
 //$(function() {
   //  $('#btn_hidden').click();
 //});
+</script>
+<script>
+    $(document).on("click", "i", function() {
+        li = $(this).closest('div')
+        child_ul = li.children('div')
+        child_ul.toggleClass('pre-animation')
+        child_ul.toggleClass('pad_left')
+        $(this).toggleClass('fa-plus fa-minus rotate')
+  });
 </script>
 <script>
   $(document).on("click", ".cat_checkbox", function() {
@@ -215,7 +245,6 @@ label {
         $('.vendors_li').each(function() {
           vendors = this.getAttribute('data-vendors').slice(1, -1).split(', ');
           categories = this.getAttribute('data-cats').split(' ');
-          console.log(categories);
           set1 = new Set(vendors);
           set2 = new Set(vend);
           set3 = new Set(categories);
@@ -234,46 +263,22 @@ label {
   });
 </script>
 <script>
-  $(document).on("click", ".fa-minus", function() {
-        var data = $('#label' + $(this).attr('id')).attr('for');
-        var class_needed = '.for_inner_' + data;
-        var container = $(class_needed);
-        container.removeClass('pad_left');
-        container.addClass('pre-animation');
-        $(this).toggleClass('fa-minus fa-plus rotate');
-        setTimeout(function () {container.html('');}, 900)
-  });
-  $(document).on("click", ".fa-plus", function() {
-        var data = $('#label' + $(this).attr('id')).attr('for');
-        var class_needed = '.for_inner_' + data;
-        var container = $(class_needed);
-        $(this).preventDefault
-                    functABC(data).then(response =>
-                        functDEF(response, container));
-
-        $(this).toggleClass('fa-minus fa-plus rotate');
-  });
-  function functABC(data){
-            return $.ajax({
-                    data : { cat_id: data, },
-                    type : 'POST',
-                    url : '/get_cat_html'
-                });
-        }
-        functDEF = function (resp, container) {
-            container.html(resp);
-            setTimeout(function () {
-            container.addClass('pad_left');
-            container.removeClass('pre-animation');;
-            }, 200)
-        }
-</script>
-<script>
   $(".priceForm input").on("input", function() {
       start = Number($("#start").val());
       end = Number($("#end").val());
       if (!end) end = 9999999999;
-      if (!start) start = -1;
+      prices = $('#prices_hidden').val()
+      prices1 = prices.slice(1, -1).split(', ');
+      prices2 = prices.slice(1, -1).split(', ');
+      prices1.push(end)
+      prices2.push(start)
+      if ((Math.max.apply(null, prices2) == start) || (Math.min.apply(null, prices1) == end) || (start > end)) {
+          $(".priceForm input").addClass('cian_none')
+          return false
+      }
+      else {
+          $(".priceForm input").removeClass('cian_none')
+      }
       $('.vendors_li').each(function() {
           price = Number(this.getAttribute('data-price'));
           if ((start > price) || (price > end)) {

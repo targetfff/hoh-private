@@ -1,9 +1,179 @@
 {% extends 'base.html' %}
 
 {% block title %}
-<title>товар</title>
+<title> {{ product.title }} </title>
+<style>
+.none {display: none !important;}
+    .product-container {
+        margin-left: 10%;
+        margin-right: 10%;
+        margin-bottom: 5em;
+        margin-top: 3em;
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    button {border: none;}
+    .carousel {
+        width: 100%;
+        display: grid;
+    }
+    .product-info {
+        width: 100%;
+        padding: 1.5em;
+    }
+    .product-title {
+        margin-bottom: .5em;
+    }
+    .product-description {
+        margin-bottom: 1.5em;
+    }
+    .carousel-controls {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+}
+    .carousel-thumbnails {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        justify-content: space-between;
+        gap: .5em 2.5em;
+        padding-bottom: 1em;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+    .thumbnail {
+        margin-bottom: .5em;
+        border-radius: 10px;
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        cursor: pointer;
+        transition: all .3s;
+    }
+    .thumbnail:hover {
+        box-shadow: 0 0 5px rgba(0, 0, 0, .25) !important;
+    }
+    .main-image {
+        width: 100%;
+        border-radius: 12px;
+        height: 35em;
+        object-fit: cover;
+    }
+    .control-button {
+        font-size: 1.4em;
+        color: rgba(0, 0, 0, 0.25);
+        margin: .4em;
+        border-radius: 50%;
+        height: 3em;
+        width: 3em;
+        background-color: rgba(0, 0, 0, 0);
+        transition: all .2s ease-out;
+    }
+    .control-button:hover {
+        color: rgba(255, 255, 255, 0.75);
+        background-color: rgba(0, 0, 0, 0.15);
+    }
+
+</style>
+<script src="{{ url_for('static', filename='js/virtual-select.js') }}"></script>
+<link href="{{ url_for('static', filename='css/virtual-select.min.css') }}" rel="stylesheet" type="text/css">
+<link href="{{ url_for('static', filename='css/MyChoices2.css') }}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block body %}
-<h1>товар</h1>
+{% set a = product.images.strip('"[').strip(']"').replace("'", "").replace(",", "").split() %}
+<div class="product-container">
+    <div class="carousel">
+        <div style="position: relative; margin-bottom: 1.5em">
+            <img src="{{ url_for('static', filename='img/' + a[0]) }}" class="main-image">
+            <div class="carousel-controls">
+                <button class="prev-button control-button"><i class="fa-solid fa-arrow-left"></i></button>
+                <button class="next-button control-button"><i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+        <div class="carousel-thumbnails">
+            {% for index in range(a | length) %}
+            <img src="{{ url_for('static', filename='img/' + a[index]) }}" data-index="{{ index }}"
+                 class="thumbnail" alt="Product Image {{ index }}">
+            {% endfor %}
+        </div>
+    </div>
+    <div class="product-info">
+        <h2 class="product-title">{{ product.title }}</h2>
+        <h4 id="price" style="margin-bottom: 0.6em">{{ product.price }} руб.</h4>
+         {% autoescape false %}
+        {% if product.full_description %}
+        <p class="product-description">{{ product.full_description | replace('\n','<br>') }}</p>
+        {% else %}
+        <p class="product-description">{{ product.description | replace('\n','<br>') }}</p>
+        {% endif %}
+        {% endautoescape %}
+        <div id="example-select" data-search="false"></div><br><br>
+        {% for el in vendors %}
+        {% if el.title %}
+        <input class="options_for_select" hidden="hidden" id="{{ el.id }}" value="{{ el.title }}">
+        {% else %}
+        <input class="options_for_select" hidden="hidden" id="{{ el.id }}" value="{{ el.name + ' ' + el.surname }}">
+        {% endif %}
+        {% endfor %}
+        <script src="{{ url_for('static', filename='js/MyChoices4.js') }}"></script>
+        <a href="/cart" class="btn btn-outline-success me-2">В избранное</a>
+        <a href="/cart" class="btn btn-outline-success">Купить</a>
+        {% for key, value in ven_prices %}
+        <input hidden="hidden" value="{{ value }}" id="vp{{ key }}">
+        {% endfor %}
+    </div>
+</div>
+<script>
+$(function() {
+    $('#example-select').change();
+});
+</script>
+<script>
+const mainImage = $('.main-image');
+let images = [];
+
+$('.thumbnail').each(function() {
+    images.push($(this).attr('src'));
+});
+
+mainImage.attr('src', images[0]);
+
+currentIndex = 0
+
+    const prevButton = $('.prev-button');
+    const nextButton = $('.next-button');
+
+    prevButton.on('click', function() {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        mainImage.attr('src', images[currentIndex]);
+    });
+
+    nextButton.on('click', function() {
+        currentIndex = (currentIndex + 1) % images.length;
+        mainImage.attr('src', images[currentIndex]);
+    });
+if (images.length == 1) {
+    $('.control-button').addClass('none')
+    $('.carousel-thumbnails').addClass('none')
+}
+</script>
+<script>
+    $('#example-select').on('change', function() {
+        vendor = $(this).val();
+        price = $('#vp' + vendor).val()
+        $('#price').text(price + ' руб.')
+    });
+    $(document).on("click", '.thumbnail', function() {
+        index = $(this).data('index')
+        mainImage.attr('src', images[index]);
+        currentIndex = index;
+  });
+</script>
 {% endblock %}
