@@ -3,10 +3,116 @@
 {% block title %}
 <title>Личный кабинет</title>
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/itc-slider.css') }}"/>
+<script src="{{ url_for('static', filename='js/itc-slider.js') }}" defer></script>
 <style>
+   .itc-slider-item {
+        flex: 0 0 25%;
+    }
    .targetff {
     font-size: 14pt;
-   }
+    }
+    .itc-slider__item {
+      flex: 0 0 50%;
+      max-width: 50%;
+      height: 250px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 7rem;
+    }
+    .card{
+        margin-left: 1em !important;
+        margin-right: 1em !important;
+    }
+    .heart-none {opacity:0}
+.heart-visible {opacity: 1}
+.fa-solid {
+    animation: vis-heart .4s;
+}
+.fa-regular {
+    animation: vis-heart-2 .4s;
+}
+.red {
+  color: rgb(240, 0, 0) !important;
+}
+.fa-heart:hover {
+    transform: scale(1.4);
+    color: rgb(240, 0, 0);
+}
+@keyframes vis-heart {
+        0% {
+          transform: scale(0);
+        }
+        100% {
+          transform: scale(1.4);
+        }
+}
+@keyframes vis-heart-2 {
+        0% {
+          transform: scale(0);
+        }
+        100% {
+          transform: scale(1.4);
+        }
+}
+.dj_lubov {
+    border-radius: 15px;
+}
+.for_vendor_form {
+    border-radius: 12px;
+    transition: all 0.5s;
+    height: 100%;
+    background-color: white;
+    padding: 2em;
+}
+.for_vendor_form:hover {
+    box-shadow: 0 5px 10px gray !important;
+}
+.itc-slider-btn-prev::before {
+  background-image: url(static/svg/left-arrow-svgrepo-com.svg);
+  filter: invert(49%) sepia(3%) saturate(16%) hue-rotate(340deg) brightness(94%) contrast(81%);
+  transition: all .3s;
+}
+
+.itc-slider-btn-next::before {
+  background-image: url(static/svg/right-arrow-svgrepo-com.svg);
+  filter: invert(49%) sepia(3%) saturate(16%) hue-rotate(340deg) brightness(94%) contrast(81%);
+  transition: all .3s;
+}
+.itc-slider-btn-next:hover::before {
+    filter: invert(100%) sepia(99%) saturate(4%) hue-rotate(258deg) brightness(106%) contrast(100%) !important;
+}
+.itc-slider-btn-prev:hover::before {
+    filter: invert(100%) sepia(99%) saturate(4%) hue-rotate(258deg) brightness(106%) contrast(100%) !important;
+}
+.itc-slider-wrapper {
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+.fa-heart {
+    cursor: pointer;
+    color: rgba(60, 60, 60, 1);
+    transition: transform 0.2s, opacity 0.3s, color 0.5s;
+    transform: scale(1.4);
+    position: absolute;
+    top: 0.4em;
+    right: 0.6em;
+}
+li { 
+  text-align:center;
+}
+.center-screen {
+  font-size: 20px;
+  color: gray;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 100%;
+}
 </style>
 
 {% endblock %}
@@ -16,7 +122,7 @@
 {% if user.status == 'admin' %}
 <link href="static/css/AdminDynamicSelect.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="static/css/PopUpPhotos.css">
-<h1>Администрация МОХ</h1><br>
+<h1 style="margin-bottom: .5em;">Администрация МОХ</h1>
 <h4 class="mb-4">Управление базой товаров</h4>
 <a class="me-2 btn btn-outline-primary" href="/create" style="font-size: 20px">Добавить товар</a>
 <a class="me-2 btn btn-outline-primary" href="/delete" style="font-size: 20px">Удалить товар</a>
@@ -143,7 +249,6 @@
     </script>
     <script src="static/js/DynamicSelect.js"></script>
     <script src="static/js/PopUpPhotos.js"></script>
-<br><br>
 <h5>Предложения по добавлению товаров</h5><br>
 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 2%; row-gap: 2%;">
     {% for i in sug_data %}
@@ -241,16 +346,16 @@
 {% elif user.status == 'vendor' %}
 <link href="static/css/DynamicSelect.css" rel="stylesheet" type="text/css">
 <h1>Личный кабинет</h1><br>
+    <div style="display: grid; grid-template-columns: 2fr 3fr; gap: 5%; margin-left: 5%; margin-right: 5%;">
     <div>
-    <div style="width: 30%; float:left">
         {% if vendor.logo %}
-            <img src="static/img/{{ vendor.logo }}" align="left" vspace="5" hspace="5" width="100%">
+            <img class="dj_lubov" src="static/img/{{ vendor.logo }}" style="max-width: 100%">
         {% else %}
-            <img src="static/img/570238.png" align="left" vspace="5" hspace="5" width="100%">
+            <img class="dj_lubov" src="static/img/570238.png" style="max-width: 100%">
         {% endif %}
     </div>
 
-    <div style="width: 70%; float:right; padding: 0px 35px">
+    <div>
         <h3 class="my-0 fw-normal">{{ vendor.title }}</h3><br>
         <h4 class="my-0 fw-normal">{{ vendor.surname + ' ' + vendor.name + ' ' + vendor.patronymic }}</h4><br>
         <form id="vendor_change" method="post" enctype="multipart/form-data">
@@ -276,8 +381,9 @@
         </form>
     </div>
     </div>
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    <h3 style="margin-top:15px">Торговля</h3><br>
+    <h3 style="margin-top: 1.5em">Торговля</h3><br>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2em;">
+    <div class="for_vendor_form">
     <h4>Заявка на торговлю товаром</h4><br>
     <p class="targetff">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis imperdiet massa tincidunt nunc pulvinar. Justo laoreet sit amet cursus sit amet dictum sit. Facilisi etiam dignissim diam quis enim lobortis. Tristique nulla aliquet enim tortor at auctor urna nunc. At consectetur lorem donec massa sapien. Dictum non consectetur a erat nam at lectus. Mattis enim ut tellus elementum sagittis vitae. Sodales ut etiam sit amet nisl purus. Rhoncus aenean vel elit scelerisque mauris pellentesque. At consectetur lorem donec massa sapien faucibus. Amet luctus venenatis lectus magna fringilla urna porttitor rhoncus dolor. Pellentesque dignissim enim sit amet venenatis urna cursus eget.
@@ -298,9 +404,9 @@
         <label class="targetff" for="images">Добавьте фотографии товара:</label><br><br>
         <input type="file" multiple="multiple" required accept="image" name="images[]" id="images"><br><br>
         <button class="btn btn-outline-success" type="submit">Оплатить и отправить заявку</button>
-    </form><br><br><br>
+    </form></div>
     <script src="static/js/DynamicSelect.js"></script>
-    <h4>Заявка на добавление товара</h4><br>
+    <div class="for_vendor_form"><h4>Заявка на добавление товара</h4><br>
     <p class="targetff">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis imperdiet massa tincidunt nunc pulvinar. Justo laoreet sit amet cursus sit amet dictum sit. Facilisi etiam dignissim diam quis enim lobortis. Tristique nulla aliquet enim tortor at auctor urna nunc.
     </p><br>
@@ -313,65 +419,98 @@
         <label class="targetff" for="images2">Добавьте изображения товара:</label><br><br>
         <input required type="file" multiple="multiple" accept="image" name="images2[]" id="images2"><br><br>
         <button class="btn btn-outline-success" type="submit">Отправить заявку</button>
-    </form><br><br><br>
+    </form></div></div><br><br><br>
     <h3>Мессенджер</h3><br>
 
 {% else %}
 
 <h1>Личный кабинет</h1><br>
 <h3>История просмотра</h3><br>
-
-<div class="swiper mySwiper container">
-      <div class="swiper-wrapper">
-          {% for el in data*2 %}
-          <div class="swiper-slide">
-              <div class="col">
-                  <div class="card rounded-3 shadow-sm" style="width: 18rem;">
-                      <div class="card-header py-3">
-                          <h5 style="display:inline;" class="my-0 fw-normal">{{ el.title }}</h5>
+<div class="container for_inner">
+    {% if recent %}
+    <div class="itc-slider" data-slider="itc-slider" data-loop="false">
+        <div class="itc-slider-wrapper">
+          <div class="itc-slider-items">
+            {% for el in recent %}
+            <div class="itc-slider-item">
+                <div class="card mb-4 rounded-3 shadow-sm" id="prod{{ el.id }}">
+                    <div class="card-header py-3">
+                      <h5 class="my-0 fw-normal">{{ el.title }}</h5>
+                    </div>
+                    <div class="card-body">
+                      {% if el.images %}
+                      {% set a = el.images.strip('"[').strip(']"').replace("'", "").replace(",", "").split()[0] %}
+                      <div style="position:relative">
+                        {% if el.id in liked %}
+                          <i class="fa-solid fa-heart heart-none" data-like="{{ el.id }}" data-price="{{ el.price }}"></i>
+                          <input hidden="hidden" type="checkbox" class="heart-checkbox" checked>
+                          {% else %}
+                          <i class="fa-regular fa-heart heart-none" data-like="{{ el.id }}" data-price="{{ el.price }}"></i>
+                          <input hidden="hidden" type="checkbox" class="heart-checkbox">
+                          {% endif %}
+                          <a href="/product/{{ el.id }}"><img class="img-fluid" src="static/img/{{ a }}" alt="{{ a }}"></a>
                       </div>
-                      <div class="card-body">
-                          {% set a = el.main_image %}
-                          <a href="#"> <img class="img-fluid" src="static/img/{{ a }}" alt="{{ a }}"></a><br><br>
-                          <button type="button" class="w-100 btn btn-lg btn-outline-primary" style="font-size :18px;">
-                              от {{ el.price }} руб.
-                          </button>
-                      </div>
+                      {% endif %}
+                      <ul class="list-unstyled mt-3 mb-4">
+                        <li>{{ el.description }}</li>
+                      </ul>
+                    </div>
                   </div>
-              </div>
+            </div>
+            {% endfor %}
+          </div>
         </div>
-        {% endfor %}
-      </div>
-      <br>
-      <div class="swiper-button-next"></div>
-      <div class="swiper-button-prev"></div>
-    </div><br>
+        <!-- Кнопки для перехода к предыдущему и следующему слайду -->
+        <button class="itc-slider-btn itc-slider-btn-prev"></button>
+        <button class="itc-slider-btn itc-slider-btn-next"></button>
+    </div>
+    {% else %}
+    <div class="center-screen">История просмотра пока пуста</div>
+    {% endif %}
+</div>
+<br>
+<h3>Мессенджер</h3><br>
 
-    <!-- Swiper JS -->
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-
-    <!-- Initialize Swiper -->
-    <script>
-      var swiper = new Swiper(".mySwiper", {
-        slidesPerView: 4,
-        spaceBetween: 40,
-        slidesPerGroup: 4,
-        loop: true,
-        loopFillGroupWithBlank: true,
-        pagination: {
-          el: ".swiper-pagination",
-          clickable: true,
-        },
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev",
-        },
+<script>
+    $(document).ready(() => { // DOM готов к взаимодейтсвию
+        if ($('.itc-slider-item').length < 5) {$('.itc-slider-btn-next').css('display', 'none')}
+    })
+    $('.card').on('mouseenter', function() {
+        i = $('.fa-heart', $(this));
+        i.toggleClass('heart-none heart-visible');
+    });
+    $('.card').on('mouseleave', function() {
+        i = $('.fa-heart', $(this));
+        i.removeClass('red');
+        i.toggleClass('heart-none heart-visible');
+    });
+    $('.fa-heart').on('click', function(){
+      parent = $(this).closest('div')
+      checkbox = $('.heart-checkbox', parent)
+      if (checkbox.is(':checked')){
+          checkbox.prop('checked', false);
+        $.ajax({
+        data : {  liked_id: $(this).data('like'), 
+                  liked_price: $(this).data('price'),
+                  action: "dislike"},
+        type : 'POST',
+        url : '/kek'
       });
-    </script>
-
-    <h3>Мессенджер</h3><br>
-
-
+    } else {
+        checkbox.prop('checked', true);
+      $(this).addClass('red');
+      $.ajax({
+        data : {  liked_id: $(this).data('like'), 
+                  liked_price: $(this).data('price'),
+                  action: "like"},
+        type : 'POST',
+        url : '/kek'
+      });
+    }
+    $(this).toggleClass('fa-solid fa-regular');
+    count_liked()
+    })
+</script>
 {% endif %}
 </div>
 {% endblock %}

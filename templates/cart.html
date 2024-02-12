@@ -2,9 +2,261 @@
 
 {% block title %}
 <title>Корзина</title>
+<style>ul{list-style: none;margin-bottom: 0px}
+.cart_section{width: 100%;padding-top: 93px;padding-bottom: 111px}
+.cart_title{font-size: 30px;font-weight: 500}
+.cart_list{border: solid 1px #e8e8e8;border-radius: 12px; box-shadow: 0px 1px 5px rgba(0,0,0,0.15);background-color: #fff}
+.cart_item{padding-bottom: 1em; width: 100%; max-width: 100%; display:grid; grid-template-columns: 8em 5fr;}
+.cart_div:hover {
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.2);
+}
+.cart_div {
+    z-index: 2;
+    transition: opacity .45s, box-shadow .2s, max-height .5s ease-in-out, padding-top .5s ease-in-out;
+    padding-left: 2em;
+    padding-right: 2em;
+    padding-top: 1em;
+    border-radius: inherit;
+    max-height: 10em;
+}
+.cart_item_image{ width: 8em;height: 8em;float: left}
+img{transition: opacity .45s, box-shadow .2s, height 3s, padding-top 1s; max-width: 100%}
+.cart_item_info{max-width: 100%; margin-left: 3em; height: 100%; padding-top: 1em; padding-bottom: 1em;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+}
+.cart_item_cell{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.cart_item_title{font-size: 14px;font-weight: 400; text-align: right; color: rgba(0,0,0,0.5)}
+.cart_item_text{
+    font-size: 18px;
+    text-align: right;
+}
+.cart_item_total{text-align: right}
+.order_total{ display:flex; justify-self: self-end; justify-content:space-between; align-items: center;
+width: 30%;height: 4em;margin-top: 1.5em;border: solid 1px #e8e8e8;
+box-shadow: 0px 1px 5px rgba(0,0,0,0.1);background-color: #fff; border-radius: 0.5em;}
+.order_total_title{color: rgba(0,0,0,0.5);}
+.order_total_content {justify-content: space-between; display: flex;}
+p {
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    margin-right: 1.5em;
+    margin-left: 1.5em;
+}
+.cart_control{
+    display:flex;
+    justify-self: self-end;
+    justify-content:space-between;
+    width: 30%;
+    height: 4em;
+    margin-top: 1.5em;
+}
+.cart_list{
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+.cart_item{
+    transition: all .2s !important;
+    border-bottom: 1px solid rgba(0, 0, 0, .15) !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+.delete_div{
+    position: absolute;
+    right: 0;
+    width: 6em;
+    height: 8em;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+}
+.cross{
+    cursor: pointer;
+    transition: all .3s;
+    opacity: 0;
+    transform: scale(1.5);
+    filter: invert(81%) sepia(7%) saturate(12%) hue-rotate(332deg) brightness(82%) contrast(83%);
+}
+.quantity {
+    display: inline-flex;
+    justify-content: center;
+    max-width: 2em;
+    width: 2em;
+    margin-left: .5em;
+    margin-right: .5em;
+}
+.fa-minus{
+    color: #dd1111;
+}
+.fa-plus{
+    color: #419020;
+}
+.none-button {
+    background-color: transparent;
+    border: none;
+}
+</style>
 {% endblock %}
 
 {% block body %}
-<h1>Корзина {{ current_user.id }}</h1>
+<div class="container"></div>
+    <div class="container pb-5" style="display: grid !important;">
+                    {% set leng_str = prods|length|string %}
+                    <div class="for_inner">
+                    {% if leng_str == '0' %}
+                    <div class="mb-4 cart_title">Избранное <small>(нет товаров)</small></div>
+                    {% elif leng_str[-1] == '1' %}
+                    <div class="mb-4 cart_title">Избранное <small>({{ prods | length }} товар)</small></div>
+                    {% else %}
+                    <div class="mb-4 cart_title">Избранное <small>({{ prods | length }} товара(-ов))</small></div>
+                    {% endif %}
+                    </div>
+                    <div class="cart_items">
+                         <ul class="cart_list">
+                             {% for i in range( prods | length ) %}
+                             {% set prod = prods[i][0] %}
+                             {% set price = prods[i][1]%}
+                             {% set quantity = prods[i][2]%}
+                             <div class="cart_div" data-product="{{ prod.id }}" data-price="{{price}}" data-quantity="{{quantity}}">
+                                <div class="delete_div">
+                                    <svg class="cross" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 11.293l10.293-10.293.707.707-10.293 10.293 10.293 10.293-.707.707-10.293-10.293-10.293 10.293-.707-.707 10.293-10.293-10.293-10.293.707-.707 10.293 10.293z"/></svg>
+                                </div>
+                             <li class="cart_item">
+                                 <div class="cart_item_image">
+                                    <a href="{{ url_for('product', id=prod.id | string) }}">
+                                     <img style="max-height: 100%;" src="{{ url_for('static', filename='img/' + prod.main_image) }}" alt="">
+                                    </a>
+                                 </div>
+                                 <div class="cart_item_info">
+                                     <div class="cart_item_cell cart_info_col">
+                                         <div class="cart_item_title" style="text-align: left">Название</div>
+                                         <div class="cart_item_text" style="text-align: left">{{ prod.title }}</div>
+                                     </div>
+                                     <div class="cart_item_cell cart_info_col">
+                                         <div class="cart_item_title">Кол-во</div>
+                                         <div class="cart_item_text" style="text-align: right">
+                                            <button class="none-button none_minus" type="button">
+                                                <i class="fa-solid fa-minus"></i>
+                                            </button>
+                                            <span class="quantity">{{quantity}}</span>
+                                            <button class="none-button none_plus" type="button">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+                                     </div>
+                                     <div class="cart_item_cell cart_info_col">
+                                         <div class="cart_item_title">Цена</div>
+                                         {% if price != 0 %}
+                                         <div class="cart_item_text">{{ price }} руб.</div>
+                                         {% else %}
+                                         <div class="cart_item_text">н/д</div>
+                                         {% endif %}
+                                     </div>
+                                     <div class="cart_item_cell cart_info_col">
+                                         <div class="cart_item_title">Legit Check</div>
+                                         <div class="cart_item_text">3100 руб.</div>
+                                     </div>
+                                     <div class="cart_item_cell cart_info_col">
+                                         <div class="cart_item_title">Итого</div>
+                                         <div class="cart_item_text prod_total">{{ price + 3100 }} руб.</div>
+                                     </div>
+                                 </div>
+                             </li>
+                            </div>
+                             {% endfor %}
+                         </ul>
+                     </div>
+                     <div class="order_total">
+                         <p>Всего:</p>
+                         <p class="order_total_amount">{{ total }} руб.</p>
+                     </div>
+                     <div class="cart_control">
+                         <button id="go_to_legit" style="width: 45%" class="btn btn-outline-success">Legit Check</button>
+                         <button id="order" style="width: 45%" class="btn btn-outline-success">Заказать</button>
+                     </div>
+    </div>
+</div>
+<script>
+  $(document).on("click", '#go_to_legit', function() {
+        window.location.href = "{{ url_for('legit_check') }}";
+  });
+  function count_total() {
+    total = 0
+    $('.cart_div').not('.not_include').each(function() {
+        this_price = $(this).data('price')
+        this_quantity = $(this).data('quantity')
+        total = total + (this_price * this_quantity) + 3100
+    });
+    $('.order_total_amount').text(total + ' руб.')
+  };
+  function count_prod_total(cart_product) {
+    this_price = cart_product.data('price')
+    this_quantity = cart_product.data('quantity')
+    prod_total = this_price * this_quantity + 3100
+    $('.prod_total', cart_product).text(prod_total + ' руб.')
+  };
+  $(document).on("mouseenter", '.cart_div', function() {
+        $('.cross', $(this)).css('opacity', '1')
+  });
+  $(document).on("mouseleave", '.cart_div', function() {
+        $('.cross', $(this)).css('opacity', '0')
+  });
+  $(document).on("click", '.none_plus', function() {
+        prod = $(this).closest('.cart_div')
+        quantity = Number(prod.data('quantity')) + 1
+        prod.data('quantity', quantity)
+        $('.quantity', prod).text(quantity)
+        count_total()
+        count_prod_total(prod)
+        prod_id = prod.data('product')
+        $.ajax({
+        data : {  amount_id: prod_id, 
+                  action: 'plus'},
+        type  : 'POST',
+        url : '/amount',
+        });
+  });
+  $(document).on("click", '.none_minus', function() {
+        prod = $(this).closest('.cart_div')
+        quantity = Number(prod.data('quantity')) - 1
+        prod.data('quantity', quantity)
+        $('.quantity', prod).text(quantity)
+        count_total()
+        count_prod_total(prod)
+        prod_id = prod.data('product')
+        $.ajax({
+        data : {  amount_id: prod_id, 
+                  action: 'minus'},
+        type  : 'POST',
+        url : '/amount',
+        });
+  });
+  $(document).on("click", '.cross', function() {
+        cart_div = $(this).closest('.cart_div')
+        prod_id = cart_div.data('product')
+        $.ajax({
+        data : {  liked_id: prod_id, 
+                  liked_price: 0,
+                  action: "dislike"},
+        type  : 'POST',
+        url : '/kek',
+        complete: function(r) {
+            $('.for_inner').html(r.responseText)
+            count_total();
+        } 
+        });
+        cart_div.addClass('not_include')
+        cart_div.css("opacity", "0")
+        cart_div.css("max-height", "0")
+        cart_div.css("padding-top", "0")
+        cart_div.css("z-index", "0")
+        count_liked()
+        setTimeout(function() {cart_div.remove()}, 500)
+  });
+</script>
 {% endblock %}
 

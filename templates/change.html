@@ -3,6 +3,9 @@
 {% block title %}
 <title>Изменение товара</title>
 <link href="static/css/DynamicSelect.css" rel="stylesheet" type="text/css">
+<script src="static/js/virtual-select.js"></script>
+<link href="static/css/virtual-select.min.css" rel="stylesheet" type="text/css">
+<link href="static/css/MyChoices.css" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block body %}
@@ -23,11 +26,11 @@
                    name="title" id="title" placeholder="Название" required><br>
             <label for="title">Название</label>
         </div>
-        <div class="form-floating">
-            <input type="text" class="form-control" value="{{ data[0].cat }}"
-                   name="cat" id="cat" placeholder="Категории" required><br>
-            <label for="cat">Категории</label>
-        </div>
+        <div id="example-select"></div><br><br>
+        {% for el in cats %}
+        <input class="options_for_select" hidden="hidden" id="{{ el.id }}" value="{{ el.title }}">
+        {% endfor %}
+        <script src="static/js/MyChoices.js"></script>
         <div class="form-floating">
             <input type="text" class="form-control" value="{{ data[0].description }}" name="description" id="description"
                    required placeholder="Краткое описание"><br>
@@ -78,5 +81,10 @@
             this.style.height = 0;
             this.style.height = (this.scrollHeight) + "px";
         });
+    </script>
+    <script>
+$(function() {
+    $('#product_to_change').click();
+});
     </script>
 {% endblock %}

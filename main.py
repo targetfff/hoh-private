@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import datetime
 import random
+from PIL import Image
 
 
 app = Flask(__name__)
@@ -61,6 +62,8 @@ class Users(db.Model, UserMixin):
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     surname = db.Column(db.String(100), nullable=False)
+    cart = db.Column(db.Text, nullable=True)
+    recent = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(100), nullable=False)
 
 
@@ -109,11 +112,32 @@ def tree_find(e, t):
     return None
 
 
+def listdir():
+    mypath = app.config['UPLOAD_FOLDER']
+    return [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+
+
+def normalize_pic(filename, img_type):
+    img = Image.open(filename)
+    width, height = img.size
+    if width >= height:
+        new_height, new_width = height, height
+    else:
+        new_height, new_width = width, width
+    resized = img.resize((new_width, new_height), Image.LANCZOS)
+    list_dir = listdir()
+    k = 0
+    while f'{img_type}{k}.png' in list_dir:
+        k += 1
+    resized.save(os.path.join(app.config['UPLOAD_FOLDER'], f'{img_type}{k}.png'), format="png")
+    return f'{img_type}{k}.png'
+
+
 @app.route('/')
 def index():
     prices = Offers.query.with_entities(Offers.price).all()
     prices1 = [x[0] for x in prices]
-    products = Products.query.filter(Products.price > 0).order_by(Products.date.desc()).all()
+    products = Products.query.order_by(Products.date.desc()).all()
     vendors_with_offers_ids = Offers.query.with_entities(Offers.vendor_id).all()
     vendors = set()
     for i in vendors_with_offers_ids:
@@ -136,8 +160,90 @@ def index():
     for k, v in dict1.items():
         n = tree_find(k, tree)
         (tree if not n else n)[k] = {e: {} for e in v}
+    if current_user.is_authenticated:
+        if current_user.cart:
+            liked = [int(x.split()[0]) for x in current_user.cart.lstrip(', ').rstrip(', ').split(', ')]
+        else:
+            liked = []
+    else:
+        liked = []
     return render_template('index.html', cats=cats, data=products,
-                           vendors=vendors, tree=tree, all_prices=prices1)
+                           vendors=vendors, tree=tree, all_prices=prices1, liked=liked)
+
+
+@app.route('/sticky_cart_span', methods=['POST', 'GET'])
+def sticky_cart_span():
+    if not current_user.is_authenticated:
+        return str(0)
+    if not current_user.cart:
+        return str(0)
+    return str(len(current_user.cart.rstrip(', ').lstrip(', ').split(', ')))
+
+
+@app.route('/amount', methods=['POST', 'GET'])
+@login_required
+def amount():
+    if request.method != 'POST':
+        return redirect('/')
+    amount_id = int(request.form.get('amount_id'))
+    action = request.form.get('action')
+    cart1 = current_user.cart.split(', ')
+    cart_ = []
+    new = ''
+    for i in cart1:
+        a = i.split()
+        if int(a[0]) != amount_id:
+            cart_.append([a[0], a[1], a[2]])
+        else:
+            if action == 'plus':
+                cart_.append([a[0], a[1], str(int(a[2]) + 1)])
+            else:
+                cart_.append([a[0], a[1], str(int(a[2]) - 1)])
+    for i in cart_:
+        new += ' '.join(i) + ', '
+    new = new.rstrip(', ').lstrip(', ')
+    current_user.cart = new
+    db.session.commit()
+    return ''
+
+
+@app.route('/kek', methods=['POST', 'GET'])
+@login_required
+def kek():
+    if request.method != 'POST':
+        return redirect('/')
+    liked_id = int(request.form.get('liked_id'))
+    liked_price = request.form.get('liked_price').rstrip(' руб.')
+    if liked_price != 'undefined' and liked_price:
+        liked_price = float(liked_price)
+    else:
+        liked_price = float(0)
+    liked = {}
+    if current_user.cart:
+        for i in current_user.cart.lstrip(', ').rstrip(', ').split(', '):
+            x = i.split()
+            liked[int(x[0])] = [float(x[1]), int(x[2])]
+    if liked_id not in liked:
+        if current_user.cart:
+            current_user.cart += f', {liked_id} {liked_price} 1'
+        else:
+            current_user.cart = f'{liked_id} {liked_price} 1'
+    else:
+        liked.pop(liked_id, None)
+        new_cart = ''
+        for j in liked:
+            new_cart += f', {j} {liked[j][0]} {liked[j][1]}'
+        current_user.cart = new_cart.lstrip(', ')
+    db.session.commit()
+    if current_user.cart.rstrip(', ').lstrip(', '):
+        leng = len(current_user.cart.rstrip(', ').lstrip(', ').split(', '))
+    else:
+        leng = 0
+    if leng == 0:
+        return '<div class="mb-4 cart_title">Избранное<small> (нет товаров) </small></div>'
+    if str(leng)[-1] == '1':
+        return f'<div class="mb-4 cart_title">Избранное<small> ({leng} товар) </small></div>'
+    return f'<div class="mb-4 cart_title">Избранное<small> ({leng} товара(-ов)) </small></div>'
 
 
 @app.route('/get_cat_html', methods=['POST', 'GET'])
@@ -156,29 +262,57 @@ def get_cat_html():
     return redirect('/')
 
 
-def kek():
-    pass
-
-
 @app.route('/product/<int:id>')
 def product(id):
+    if current_user.is_authenticated:
+        li = current_user.recent
+        if li:
+            li1 = li.split()
+            str_id = str(id)
+            if str_id in li:
+                li1.remove(str_id)
+            li1.append(str_id)
+            if len(li) > 14:
+                li1.pop(0)
+            current_user.recent = ' '.join(li)
+        else:
+            current_user.recent = str(id)
+        db.session.commit()
     this = Products.query.filter(Products.id == id).first()
-    ven = str(this.vendors).lstrip('[').rstrip(']').split(', ')
+    if this.vendors:
+        ven = str(this.vendors).lstrip('[').rstrip(']').split(', ')
+    else:
+        ven = []
     ven1 = []
     ven_prices = {}
     for i in ven:
         ven1.append(Vendors.query.filter(Vendors.id == int(i)).first())
         ven_prices[int(i)] = Offers.query.filter(Offers.vendor_id == int(i) and Offers.product_id == id).first().price
-    print(ven1)
-    print(ven_prices)
     ven1.sort(key=lambda x: ven_prices[x.id])
-    print(ven1)
-    return render_template('product.html', product=this, vendors=ven1, ven_prices=ven_prices.items())
+    if current_user.cart:
+        liked = [int(x.split()[0]) for x in current_user.cart.strip(', ').split(', ')]
+    else:
+        liked = []
+    return render_template('product.html', liked=liked, product=this, vendors=ven1, ven_prices=ven_prices.items())
 
 
 @app.route('/cart')
+@login_required
 def cart():
-    return render_template('cart.html')
+    cart1 = []
+    total = 0
+    if current_user.cart:
+        cart_prods = current_user.cart.rstrip(', ').lstrip(', ').split(', ')
+        liked = [int(x.split()[0]) for x in cart_prods]
+        for i in cart_prods:
+            a = i.split()
+            if float(a[1]) == -1:
+                a[1] = 0
+            cart1.append([Products.query.filter(Products.id == int(a[0])).first(), float(a[1]), int(a[2])])
+            total += float(a[1]) + 3100
+    else:
+        liked = []
+    return render_template('cart.html', total=total, prods=cart1, liked=liked)
 
 
 @app.route('/buy/<int:cart_id>')
@@ -350,42 +484,6 @@ def redirect_to_login(response):
 @app.route('/account', methods=['POST', 'GET'])
 @login_required
 def account():
-    ids = [id[0] for id in Products.query.with_entities(Products.id).all()]
-    for id in ids:
-        prices_and_vendors = Offers.query.filter(Offers.product_id == id).with_entities(Offers.price,
-                                                                                        Offers.vendor_id).all()
-        vendors = list(set([x[1] for x in prices_and_vendors]))
-        if not prices_and_vendors:
-            continue
-        min_price = min(prices_and_vendors, key=lambda x: x[0])
-        main_vendor_id = min_price[1]
-        vendor_info = Vendors.query.filter(Vendors.id == main_vendor_id).with_entities(Vendors.title, Vendors.name,
-                                                                                       Vendors.logo).first()
-        product_to_change = Products.query.filter(Products.id == id).first()
-        product_to_change.price = min_price[0]
-        if vendor_info[0]:
-            product_to_change.vendor = vendor_info[0]
-        else:
-            product_to_change.vendor = vendor_info[1]
-        product_to_change.main_logo = vendor_info[2]
-        vendors.remove(main_vendor_id)
-        random.shuffle(vendors)
-        a = []
-        for i in range(len(vendors)):
-            if i >= 4:
-                break
-            logo = Vendors.query.filter(Vendors.id == vendors[i]).with_entities(Vendors.logo).first()
-            a.append(logo)
-        logos = [x[0] for x in a]
-        if not logos:
-            db.session.commit()
-            continue
-        if len(logos) > 4:
-            logos = logos[:4]
-        product_to_change.logos = str(logos)
-
-        db.session.commit()
-
     products = Products.query.order_by(Products.date.desc()).all()
     if current_user.status == 'vendor':
         vendor = Vendors.query.filter(Vendors.email == current_user.email).first()
@@ -398,10 +496,46 @@ def account():
             if new_title != vendor.title:
                 vendor.title = new_title
             if filename != vendor.logo and filename:
-                new_logo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                vendor.logo = filename
+                new_logo.save(os.path.join('static/cash', filename))
+                vendor.logo = normalize_pic(os.path.join('static/cash', filename), 'logo')
             db.session.commit()
-        elif 'product_to_request' in request.form:  # vendor_trading form
+            ids = [id[0] for id in Products.query.with_entities(Products.id).all()]
+            for id in ids:
+                prices_and_vendors = Offers.query.filter(Offers.product_id == id).with_entities(Offers.price,
+                                                                                                Offers.vendor_id).all()
+                vendors = list(set([x[1] for x in prices_and_vendors]))
+                if not prices_and_vendors:
+                    continue
+                min_price = min(prices_and_vendors, key=lambda x: x[0])
+                main_vendor_id = min_price[1]
+                vendor_info = Vendors.query.filter(Vendors.id == main_vendor_id).with_entities(Vendors.title,
+                                                                                               Vendors.name,
+                                                                                               Vendors.logo).first()
+                product_to_change = Products.query.filter(Products.id == id).first()
+                product_to_change.price = min_price[0]
+                if vendor_info[0]:
+                    product_to_change.vendor = vendor_info[0]
+                else:
+                    product_to_change.vendor = vendor_info[1]
+                product_to_change.main_logo = vendor_info[2]
+                product_to_change.vendors = str(vendors)
+                vendors.remove(main_vendor_id)
+                random.shuffle(vendors)
+                a = []
+                for i in range(len(vendors)):
+                    if i >= 4:
+                        break
+                    logo = Vendors.query.filter(Vendors.id == vendors[i]).with_entities(Vendors.logo).first()
+                    a.append(logo)
+                logos = [x[0] for x in a]
+                if not logos:
+                    db.session.commit()
+                    continue
+                if len(logos) > 4:
+                    logos = logos[:4]
+                product_to_change.logos = str(logos)
+                db.session.commit()
+        elif 'product_to_request' in request.form:  # requesting form
             product_to_request = request.form['product_to_request'].replace('!@!@!', '"')
             price = request.form['price']
             photos = request.files.getlist('images[]')
@@ -410,15 +544,15 @@ def account():
             for file in photos:
                 if file:
                     filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    uploaded_images.append(filename)
+                    file.save(os.path.join('static/cash', filename))
+                    uploaded_images.append(normalize_pic(os.path.join('static/cash', filename), 'request'))
 
             new_request = Requests(product_id=int(product_to_request), price=float(price.replace(',', '.')),
                                    vendor_id=vendor.id, photos=str(uploaded_images), date=datetime.datetime.now())
             db.session.add(new_request)
             db.session.commit()
 
-        elif 'product_title' in request.form:   # vendor_product form
+        elif 'product_title' in request.form:   # suggestion form
             product_title = request.form['product_title']
             photos2 = request.files.getlist('images2[]')
 
@@ -426,8 +560,8 @@ def account():
             for file in photos2:
                 if file:
                     filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    uploaded_images.append(filename)
+                    file.save(os.path.join('static/cash', filename))
+                    uploaded_images.append(normalize_pic(os.path.join('static/cash', filename), 'suggest'))
 
             new_request = Suggestions(title=product_title, vendor_id=vendor.id,
                                       photos=str(uploaded_images), date=datetime.datetime.now(), accepted=False)
@@ -450,7 +584,21 @@ def account():
             sug_data.append([ven, sug])
         return render_template('account.html', user=current_user,
                                data=products, reqs_data=reqs_data, sug_data=sug_data)
-    return render_template('account.html', user=current_user, data=products)
+    if current_user.is_authenticated:
+        if current_user.cart:
+            liked = [int(x.split()[0]) for x in current_user.cart.lstrip(', ').rstrip(', ').split(', ')]
+        else:
+            liked = []
+    else:
+        liked = []
+    recent_ = current_user.recent
+    recent = []
+    if recent_:
+        ids = recent_.split()
+        for i in ids:
+            recent.append(Products.query.filter(Products.id == int(i)).first())
+    return render_template('account.html', user=current_user, data=products,
+                           liked=liked, recent=recent[::-1])
 
 
 @app.route('/create', methods=['POST', 'GET'])
@@ -473,19 +621,20 @@ def create():
         for file in images:
             if file:
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                uploaded_images.append(filename)
+                file.save(os.path.join('static/cash', filename))
+                uploaded_images.append(normalize_pic(os.path.join('static/cash', filename), 'product'))
 
         if main_image:
             filename = secure_filename(main_image.filename)
-            main_image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            uploaded_images.append(filename)
-            main_image = main_image.filename
+            main_image.save(os.path.join('static/cash', filename))
+            new_filename = normalize_pic(os.path.join('static/cash', filename), 'product')
+            uploaded_images.append(new_filename)
+            main_image = new_filename
         else:
             main_image = uploaded_images[0]
 
         new_product = Products(title=title, cat=cat, description=description, price=-1,
-                               full_description=full_description, main_image=secure_filename(main_image),
+                               full_description=full_description, main_image=main_image,
                                images=str(uploaded_images), date=datetime.datetime.now())
         db.session.add(new_product)
         if hidden:
@@ -596,7 +745,9 @@ def process_list():
     if current_user.status == 'admin' and request.method == 'POST':
         product_to_change = request.form['product_to_change']
         selected = Products.query.filter(Products.id == int(product_to_change)).first()
-        return render_template('process_list.html', data=selected)
+        cats = Categories.query.all()
+        selected_ = selected.cat.split()
+        return render_template('process_list.html', data=selected, cats=cats, selected=selected_)
     return redirect('/')
 
 
@@ -610,6 +761,7 @@ def change():
         this = Products.query.filter(Products.id == int(product_to_change)).first()
         title = request.form['title']
         cat = request.form['cat']
+        print(cat)
         description = request.form['description']
         full_description = request.form['full_description']
         images = request.files.getlist('images[]')
@@ -619,13 +771,14 @@ def change():
             for file in images:
                 if file:
                     filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    uploaded_images.append(filename)
+                    file.save(os.path.join('static/cash', filename))
+                    uploaded_images.append(normalize_pic(os.path.join('static/cash', filename), 'product'))
             if main_image:
                 filename = secure_filename(main_image.filename)
-                main_image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                uploaded_images.append(filename)
-                main_image = main_image.filename
+                main_image.save(os.path.join('static/cash', filename))
+                new_filename = normalize_pic(os.path.join('static/cash', filename), 'product')
+                uploaded_images.append(new_filename)
+                main_image = new_filename
             else:
                 main_image = uploaded_images[0]
             this.main_image = secure_filename(main_image)
@@ -656,7 +809,8 @@ def become_a_seller():
 
         if logo:
             filename = secure_filename(logo.filename)
-            logo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            logo.save(os.path.join('static/cash', filename))
+            filename = normalize_pic(os.path.join('static/cash', filename), 'product')
         else:
             filename = None
 

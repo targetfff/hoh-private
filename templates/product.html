@@ -10,11 +10,10 @@
         margin-bottom: 5em;
         margin-top: 3em;
         display: grid;
-        grid-template-columns: 1.5fr 1fr;
+        grid-template-columns: 1.8fr 1fr;
         max-width: 100%;
         overflow: hidden;
     }
-    button {border: none;}
     .carousel {
         width: 100%;
         display: grid;
@@ -56,6 +55,33 @@
         cursor: pointer;
         transition: all .3s;
     }
+.double_span_button{
+    overflow: hidden;
+    position: relative;
+    padding: 0% !important;
+    transition: all .2s;
+}
+.slider{
+    position: absolute;
+    top: 0px;
+    display: grid;
+    align-items: center;
+    grid-template-rows: 1fr 1fr;
+    max-width: 100%;
+    pointer-events: none;
+    transition: 0.5s cubic-bezier(0.50 , -0.600 , 0.200 , 1.6);
+}
+.opacity_span {
+    opacity: 0;
+}
+.span1, .span2{
+    color: #198754;
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: all .2s;
+}
     .thumbnail:hover {
         box-shadow: 0 0 5px rgba(0, 0, 0, .25) !important;
     }
@@ -66,6 +92,7 @@
         object-fit: cover;
     }
     .control-button {
+        border: none !important;
         font-size: 1.4em;
         color: rgba(0, 0, 0, 0.25);
         margin: .4em;
@@ -79,7 +106,16 @@
         color: rgba(255, 255, 255, 0.75);
         background-color: rgba(0, 0, 0, 0.15);
     }
-
+    .cart_buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 80%;
+        gap: 1em;
+        height: 4em;
+    }
+    .fa-cart-shopping{
+        transform: scale(1.5);
+    }
 </style>
 <script src="{{ url_for('static', filename='js/virtual-select.js') }}"></script>
 <link href="{{ url_for('static', filename='css/virtual-select.min.css') }}" rel="stylesheet" type="text/css">
@@ -123,13 +159,58 @@
         {% endif %}
         {% endfor %}
         <script src="{{ url_for('static', filename='js/MyChoices4.js') }}"></script>
-        <a href="/cart" class="btn btn-outline-success me-2">В избранное</a>
-        <a href="/cart" class="btn btn-outline-success">Купить</a>
+        <div class="cart_buttons">
+            {% if product.id not in liked %}
+            <button id="like" data-like="like" type="button" class="double_span_button btn btn-outline-success">
+                <div class="slider">
+                    <span class="span1"><i class="fa-solid fa-cart-shopping"></i></span>
+                    <span class="span2">В избранное</span>
+                </div>
+            </button>
+            {% else %}
+            <button id="like" data-like="dislike" type="button" class="double_span_button btn btn-outline-success">
+                <div class="slider">
+                    <span class="span1"><i class="fa-solid fa-cart-shopping"></i></span>
+                    <span class="span2">Удалить из избранного</span>
+                </div>
+            </button>
+            {% endif %}
+            <button type="button" id="go_to_cart" class="btn btn-outline-success">Купить</button>
+        </div>
         {% for key, value in ven_prices %}
         <input hidden="hidden" value="{{ value }}" id="vp{{ key }}">
         {% endfor %}
     </div>
 </div>
+<script>
+   button = document.querySelector(".double_span_button");
+   slider = document.querySelector(".slider");
+   span1 = document.querySelector(".span1");
+   span2 = document.querySelector(".span2");
+
+   slider.style.width = button.clientWidth + "px";
+   span1.style.width = button.clientWidth + "px";
+   span1.style.height = button.clientHeight + "px";
+   span2.style.width = button.clientWidth + "px";
+   span2.style.height = button.clientHeight + "px";
+
+   button.onmouseover = function(){
+    slider.style.width = button.clientWidth + "px";
+   span1.style.width = button.clientWidth + "px";
+   span1.style.height = button.clientHeight + "px";
+   span2.style.width = button.clientWidth + "px";
+   span2.style.height = button.clientHeight + "px";
+       slider.style.top = "-" + span1.clientHeight + "px";
+   }
+   button.onmouseout = function(){
+    slider.style.width = button.clientWidth + "px";
+   span1.style.width = button.clientWidth + "px";
+   span1.style.height = button.clientHeight + "px";
+   span2.style.width = button.clientWidth + "px";
+   span2.style.height = button.clientHeight + "px";
+       slider.style.top = "0px";
+   }
+</script>
 <script>
 $(function() {
     $('#example-select').change();
@@ -168,12 +249,69 @@ if (images.length == 1) {
     $('#example-select').on('change', function() {
         vendor = $(this).val();
         price = $('#vp' + vendor).val()
-        $('#price').text(price + ' руб.')
+        if (price) {
+        $('#price').text(price + ' руб.')} else {
+            $('#price').text('')
+        }
     });
     $(document).on("click", '.thumbnail', function() {
         index = $(this).data('index')
         mainImage.attr('src', images[index]);
         currentIndex = index;
+  });
+  $(document).on("click", '#go_to_cart', function() {
+        window.location.href = "{{ url_for('cart') }}";
+  });
+  $(document).on("click", '#like', function() {
+    $.ajax({
+        data : {  liked_id: "{{ product.id }}", 
+                  liked_price: $('#price').text(),
+                  action: $(this).data('like')},
+        type : 'POST',
+        url : '/kek'
+    });
+    if ($(this).data("like") == "like") {
+        $(this).data("like", "dislike")
+        span = $('.span2', $(this))
+        span.addClass('opacity_span')
+        setTimeout(function () {
+            span.text('Удалить из избранного')
+            span.removeClass('opacity_span')
+        }, 200)
+    } else {
+        $(this).data("like", "like")
+        span = $('.span2', $(this))
+        span.addClass('opacity_span')
+        setTimeout(function () {
+            span.text('В избранное')
+            span.removeClass('opacity_span')
+        }, 200)
+  };
+  count_liked()
+  });
+  $(document).on("mouseenter", '.vscomp-toggle-button', function() {
+        $(this).css("background-color", "#198754");
+        $('.vscomp-value').css("color", "#fff");
+        $('.vscomp-arrow').toggleClass('vscomp-arrow changed')
+  });
+  $(document).on("mouseleave", '.vscomp-toggle-button', function() {
+        $(this).css("background-color", "rgba(0,0,0,0)")
+        $('.vscomp-value').css("color", "#198754");
+        $('.changed').toggleClass('vscomp-arrow changed')
+  });
+  $(document).on("mouseenter", '.double_span_button', function() {
+        span1_ = $('.span1', $(this))
+        span2_ = $('.span2', $(this))
+        span1_.css('color', '#fff')
+        span2_.css('color', '#fff')
+        
+  });
+  $(document).on("mouseleave", '.double_span_button', function() {
+        span1_ = $('.span1', $(this))
+        span2_ = $('.span2', $(this))
+        span1_.css('color', '#198754')
+        span2_.css('color', '#198754')
+        
   });
 </script>
 {% endblock %}

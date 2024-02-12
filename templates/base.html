@@ -5,25 +5,165 @@
     <meta name="viewport"
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="{{ url_for('static', filename='const/logo_moh.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/068f76ea97.js" crossorigin="anonymous"></script>
     <style>body {background-color: #f4f8f4}
-    .form-control:focus{
-      border-color: #5cb85c;
-      box-shadow: 0 0 0 .25rem rgba(92,184,92,.25);
-      -webkit-box-shadow: box-shadow: 0 0 0 .25rem rgba(13,110,253,.25)}</style>
+    .card {transition: box-shadow 0.5s;}
+    .card:hover {
+      box-shadow: 0 5px 10px gray !important;
+    }
+    .form-control:focus {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+    } 
+    .for_sticky_cart {
+      transition: all .3s;
+      box-shadow: 0 0 5px rgba(0, 0, 0,.35);
+      cursor: pointer;
+      position: fixed;
+      bottom: 2em;
+      right: 2em;
+      background-color: #fff;
+      width: 4.5em;
+      height: 4.5em;
+      z-index: 1001;
+      text-align: center;
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      border-radius: 50%;
+    }
+    .for_sticky_cart:hover {
+      box-shadow: 0 0 5px rgba(0, 0, 0,.65);
+    }
+    .sticky_cart {
+      animation: none !important;
+      transform: scale(1.5) !important;
+      color: black !important;
+      margin-left: -0.15em !important;
+    }
+    .header {
+      position: sticky;
+      top: 0;
+      transition: .3s;
+      z-index: 1000;
+    }
+    .header_hidden {
+      transform: translateY(-100%);
+    }
+    .sticky_cart_amount{
+      transition: opacity .2s;
+      opacity: 0;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-items: center;
+      top: 0;
+      right: 0;
+      background-color: #5dc87c;
+      margin-top: 1em;
+      border-radius: 50%;
+      margin-right: 1em;
+      width: 1.2em;
+      height: 1.2em;
+      color: black;
+    }
+    .sticky_bot_message{
+      transition: opacity .2s;
+      background-color: #5cb85c;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-items: center;
+      top: 0;
+      right: 0;
+      background-color: #5dc87c;
+      margin-top: 1em;
+      border-radius: 50%;
+      margin-right: 1em;
+      width: 1em;
+      height: 1em;
+      color: black;
+    }
+    .for_sticky_bot {
+      transition: all .3s;
+      box-shadow: 0 0 5px rgba(0, 0, 0,.35);
+      cursor: pointer;
+      position: fixed;
+      bottom: 7em;
+      right: 2em;
+      background-color: #fff;
+      width: 4.5em;
+      height: 4.5em;
+      z-index: 1001;
+      text-align: center;
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      border-radius: 50%;
+    }
+    .for_sticky_bot:hover {
+      box-shadow: 0 0 5px rgba(0, 0, 0,.65);
+    }
+    .sticky_bot {
+      animation: none !important;
+      transform: scale(1.55) !important;
+      color: black !important;
+      margin-bottom: .15em !important;
+    }
+    @font-face {
+	    font-family: 'beryozki'; 
+	    src: url({{ url_for('static', filename='const/Beryozki.ttf')}}); 
+    }
+    .test {
+      font-family: 'beryozki';
+      font-size: 50px;
+      margin-bottom: -.2em;
+    }
+    .test1:hover {
+      color: black !important;
+    }
+
+    .header_logo{
+      height: 4.5em;
+      width: 4.5em;
+      position: relative;
+      display: flex;
+      gap: 5px;
+      margin-right: 1em;
+    }
+    .header_logo__img{
+      position: absolute;
+      height: 100%;
+      width: 100%;
+    }
+  
+    
+    </style>
     {% block title %}{% endblock %}
 </head>
 <body>
 
-
-  <header style="background-color: #fff; padding-top: 1em;">
-    <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-      <a style="padding-left: 2em" href="/" class="d-flex align-items-center link-body-emphasis text-decoration-none">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="32" class="me-2" viewBox="0 0 118 94" role="img"><title>Мох</title><path fill-rule="evenodd" clip-rule="evenodd" d="M24.509 0c-6.733 0-11.715 5.893-11.492 12.284.214 6.14-.064 14.092-2.066 20.577C8.943 39.365 5.547 43.485 0 44.014v5.972c5.547.529 8.943 4.649 10.951 11.153 2.002 6.485 2.28 14.437 2.066 20.577C12.794 88.106 17.776 94 24.51 94H93.5c6.733 0 11.714-5.893 11.491-12.284-.214-6.14.064-14.092 2.066-20.577 2.009-6.504 5.396-10.624 10.943-11.153v-5.972c-5.547-.529-8.934-4.649-10.943-11.153-2.002-6.484-2.28-14.437-2.066-20.577C105.214 5.894 100.233 0 93.5 0H24.508zM80 57.863C80 66.663 73.436 72 62.543 72H44a2 2 0 01-2-2V24a2 2 0 012-2h18.437c9.083 0 15.044 4.92 15.044 12.474 0 5.302-4.01 10.049-9.119 10.88v.277C75.317 46.394 80 51.21 80 57.863zM60.521 28.34H49.948v14.934h8.905c6.884 0 10.68-2.772 10.68-7.727 0-4.643-3.264-7.207-9.012-7.207zM49.948 49.2v16.458H60.91c7.167 0 10.964-2.876 10.964-8.281 0-5.406-3.903-8.178-11.425-8.178H49.948z" fill="currentColor"></path></svg>
-        <span class="fs-4">Мох</span>
+  <a href="{{ url_for('cart') }}"><div class="for_sticky_cart">
+    <i class="sticky_cart fa-solid fa-cart-shopping"></i>
+    <div class="sticky_cart_amount">
+      <span id="sticky_cart_span" style="transition: all .3s; margin-top: -.2em; font-size: 16px; font-weight: 500; letter-spacing: -0.16em;"></span>
+    </div>
+  </div></a>
+  <a href="{{ url_for('cart') }}"><div class="for_sticky_bot">
+    <i class="sticky_bot fa-solid fa-robot"></i>
+  </div></a>
+  <div class="header" style="background-color: #fff; padding-top: 1em;">
+    <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom" style="height: 4em;">
+      <a style="padding-left: 2em" href="/" class="test1 d-flex align-items-center link-body-emphasis text-decoration-none">
+        <div class="header_logo">
+          <img src="{{ url_for('static', filename='const/logo_moh.png') }}" class=" header_logo__img">
+        </div>
+        <span class="test">МоХ</span>
+        
       </a>
 
       <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
@@ -42,7 +182,7 @@
         {% endif %}
       </nav>
     </div>
-  </header>
+  </div>
   <div class="px-3">
   {% block body %}{% endblock %}
   </div>
@@ -86,4 +226,51 @@
   </footer>
 </div>
 </body>
+<script>
+  function count_liked() {
+  this_span = $('#sticky_cart_span')
+  this_span.closest('.sticky_cart_amount').css('opacity', '0')
+  setTimeout(function(){ $.ajax({
+        data : {},
+        type  : 'POST',
+        url : '/sticky_cart_span',
+        complete: function(r) {
+            len_ = Number(r.responseText);
+            if (len_ == 0) {
+              this_span.closest('.sticky_cart_amount').css('opacity', '0')
+            } else {
+              if (len_ > 9) {
+                this_span.closest('.sticky_cart_amount').css('opacity', '1')
+                this_span.text('9+')
+                this_span.css('letter-spacing', '-.16em')
+              } else {
+                this_span.closest('.sticky_cart_amount').css('opacity', '1')
+                this_span.text(len_)
+                this_span.css('letter-spacing', '0')
+              }
+            }
+        }
+  });
+  this_span.css('opacity', 1)}, 300);}
+  $(document).ready(() => { // DOM готов к взаимодейтсвию
+  count_liked()
+  const onScrollHeader = () => { // объявляем основную функцию onScrollHeader
+  const header = $('.header') // находим header и записываем в константу
+  let prevScroll = $(window).scrollTop() // узнаем на сколько была прокручена страница ранее
+  let currentScroll // на сколько прокручена страница сейчас (пока нет значения)
+  $(window).scroll(() => { // при прокрутке страницы
+    currentScroll = $(window).scrollTop() // узнаем на сколько прокрутили страницу
+    const headerHidden = () => header.hasClass('header_hidden') // узнаем скрыт header или нет
+    if (currentScroll > prevScroll && !headerHidden()) { // если прокручиваем страницу вниз и header не скрыт
+      setTimeout(function() { header.addClass('header_hidden') }, 250) // то скрываем header
+    }
+    if (currentScroll < prevScroll && headerHidden()) { // если прокручиваем страницу вверх и header скрыт
+      setTimeout(function() { header.removeClass('header_hidden') }, 250) // то отображаем header
+    }
+    prevScroll = currentScroll // записываем на сколько прокручена страница на данный момент
+  })
+}
+onScrollHeader() // вызываем основную функцию onScrollHeader
+})
+</script>
 </html>

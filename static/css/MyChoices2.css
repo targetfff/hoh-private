@@ -22,29 +22,62 @@
     font-family: var(--bs-body-font-family);
     font-size: 1rem;
     font-weight: 400;
-    color: #000000;
     opacity: 1;
 }
 
 .vscomp-toggle-button{
     --bs-border-width: 1px;
-    --bs-border-color: #dee2e6;
+    --bs-border-color: #198754;
     --bs-border-radius: 0.375rem;
     box-sizing: border-box;
     margin: 0;
     font-family: inherit;
     display: block;
-    width: 80%;
     max-height: 50%;
     font-size: 1rem;
     font-weight: 400;
     color: var(--bs-body-color);
     appearance: none;
-    background-color: var(--bs-body-bg);
+    background-color: rgba(0, 0, 0, 0);
     background-clip: padding-box;
     border: var(--bs-border-width) solid var(--bs-border-color);
     border-radius: 4px;
     padding: .75rem;
+    transition: background-color .3s;
+}
+
+.changed {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 30px;
+}
+
+.changed::after {
+    transform: rotate(45deg);
+    border: 2px solid rgba(0,0,0,0);
+    border-bottom-color: #fff;
+    border-right-color: #fff;
+    content: "";
+    height: 8px;
+    margin-top: -6px;
+    width: 8px;
+}
+
+.vscomp-arrow::after {
+    transition: border-bottom-color .3s, border-right-color .3s;
+    border: 2px solid rgba(0,0,0,0);
+    border-bottom-color: #198754;
+    border-right-color: #198754;
+}
+
+.vscomp-value {
+    color: #198754;
+    transition: color .3s;
 }
 
 .vscomp-wrapper.focused .vscomp-toggle-button, .vscomp-wrapper:focus .vscomp-toggle-button {

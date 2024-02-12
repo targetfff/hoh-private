@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="logo_moh.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/068f76ea97.js" crossorigin="anonymous"></script>
+    <style>body {background-color: #f4f8f4}
+    .card {transition: box-shadow 0.5s; max-width: 100%;}
+    .card:hover {
+      box-shadow: 0 5px 10px gray !important;
+    }
+    .form-control:focus {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+    } 
+    .for_sticky_cart {
+      transition: all .3s;
+      box-shadow: 0 0 5px rgba(0, 0, 0,.35);
+      cursor: pointer;
+      position: fixed;
+      bottom: 2em;
+      right: 2em;
+      background-color: #fff;
+      width: 4.5em;
+      height: 4.5em;
+      z-index: 1001;
+      text-align: center;
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      border-radius: 50%;
+    }
+    .for_sticky_cart:hover {
+      box-shadow: 0 0 5px rgba(0, 0, 0,.65);
+    }
+    .sticky_cart {
+      animation: none !important;
+      transform: scale(1.5) !important;
+      color: black !important;
+      margin-left: -0.15em !important;
+    }
+    .header {
+      position: sticky;
+      top: 0;
+      transition: .3s;
+      z-index: 1000;
+    }
+    .header_hidden {
+      transform: translateY(-100%);
+    }
+    .sticky_cart_amount{
+      transition: opacity .2s;
+      opacity: 0;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-items: center;
+      top: 0;
+      right: 0;
+      background-color: #5dc87c;
+      margin-top: 1em;
+      border-radius: 50%;
+      margin-right: 1em;
+      width: 1.2em;
+      height: 1.2em;
+      color: black;
+    }
+    .sticky_bot_message{
+      transition: opacity .2s;
+      background-color: #5cb85c;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-items: center;
+      top: 0;
+      right: 0;
+      background-color: #5dc87c;
+      margin-top: 1em;
+      border-radius: 50%;
+      margin-right: 1em;
+      width: 1em;
+      height: 1em;
+      color: black;
+    }
+    .for_sticky_bot {
+      transition: all .3s;
+      box-shadow: 0 0 5px rgba(0, 0, 0,.35);
+      cursor: pointer;
+      position: fixed;
+      bottom: 7em;
+      right: 2em;
+      background-color: #fff;
+      width: 4.5em;
+      height: 4.5em;
+      z-index: 1001;
+      text-align: center;
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      border-radius: 50%;
+    }
+    .for_sticky_bot:hover {
+      box-shadow: 0 0 5px rgba(0, 0, 0,.65);
+    }
+    .sticky_bot {
+      animation: none !important;
+      transform: scale(1.55) !important;
+      color: black !important;
+      margin-bottom: .15em !important;
+    }
+    @font-face {
+	    font-family: 'beryozki'; 
+	    src: url(Beryozki.ttf); 
+    }
+    .test {
+      font-family: 'beryozki';
+      font-size: 55px;
+      margin-bottom: -.2em;
+    }
+    .test1:hover {
+      color: black !important;
+    }
+    .none_vendors {display: none !important;}
+  .none {display: none !important;}
+  .cian_none {color: #afafaf}
+  .cian_none:focus {
+      color: #afafaf !important;
+      border-color: #afafaf !important;
+      box-shadow: 0 0 0 .25rem rgba(175,175,175,.25) !important;
+      -webkit-box-shadow: 0 0 0 .25rem rgba(175,175,175,.25) !important;
+  }
+  .listing {
+    max-width: 100%;
+    width: 100%;
+    padding-left: 1em}
+  .filter_block {
+    max-width: 100%;
+    float: left;
+    background-color: #fff;
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -o-sticky;
+    position: -ms-sticky;
+    position: sticky;
+    height: auto;
+    align-self: flex-start;
+    top: 1em;
+    padding: 1em;
+    margin-bottom: 1em;
+    border-radius: 12px;
+  }
+  .container_index {
+    max-width: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+  }
+  .filter_header {
+    font-weight: 500;
+    font-size: 140%;
+  }
+  .scrollable_checkboxes {
+    display: block;
+    width: 100%;
+    overflow-y: scroll;
+    height: 13em;
+  }
+.scrollable_checkboxes input[type="checkbox"] {
+  display: none;
+}
+
+label {
+    padding: 6px;
+    padding-right: 0px;
+	cursor: pointer;
+	font-weight: 400;
+}
+
+.scrollable_checkboxes input[type="checkbox"] + label:before {
+  border: 1px solid #e4e9ed;
+  content: "\00a0"; /* No break space */
+  display: inline-block;
+  font: 16px/1em sans-serif;
+  height: 16px;
+  width: 16px;
+  padding: 0;
+  margin-right: .7em;
+  vertical-align: center;
+}
+
+.scrollable_checkboxes input[type="checkbox"]:checked + label:before {
+  background: #6ba45c;
+  color: #111;
+  content: "\2714";	/* Checkmark*/
+  text-align: center;
+}
+
+.scrollable_checkboxes input[type="checkbox"]:checked + label {
+  text-shadow: 0 0 0.05px black;
+}
+
+.inner {
+  transition: all 1s;
+}
+
+.pre-animation {
+  opacity: 0;
+  max-height: 0px;
+  pointer-events: none;
+}
+.pad_left {
+  padding-left: 10px;
+  opacity:1;
+  max-height: 300px;
+}
+.fa {cursor: pointer; transition: transform .75s} /* adjust to your needs */
+.rotate {transform: rotate(180deg)}
+.heart-none {opacity:0}
+.heart-visible {opacity: 1}
+.fa-solid {
+    animation: vis-heart .4s;
+}
+.fa-regular {
+    animation: vis-heart-2 .4s;
+}
+.red {
+  color: rgb(240, 0, 0) !important;
+}
+.fa-heart:hover {
+    transform: scale(2);
+    color: rgb(240, 0, 0);
+}
+@keyframes vis-heart {
+        0% {
+          transform: scale(0);
+        }
+        100% {
+          transform: scale(1.6);
+        }
+}
+@keyframes vis-heart-2 {
+        0% {
+          transform: scale(0);
+        }
+        100% {
+          transform: scale(1.6);
+        }
+}
+li {
+    text-align: center;
+}
+.fa-heart {
+    cursor: pointer;
+    color: rgba(60, 60, 60, 1);
+    transition: transform 0.2s, opacity 0.3s, color 0.5s;
+    transform: scale(1.6);
+    position: absolute;
+    top: 0.4em;
+    right: 0.6em;
+}
+    </style>
+</head>
+
+<body>
+    <div class="header" style="background-color: #fff; padding-top: 1em;">
+        <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom" style="height: 5em;">
+          <a style="padding-left: 2em" href="/" class="test1 d-flex align-items-center link-body-emphasis text-decoration-none">
+            <img src="logo_moh.png" style="height: 4em;" class="me-3">
+            <span class="test">МоХ</span>
+          </a>
+          <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
+            <a class="me-2 py-2 px-2 text-center link-body-emphasis text-decoration-none" href="#">Legit check</a>
+            <a class="me-2 py-2 px-2 text-center link-body-emphasis text-decoration-none" href="#">Поддержка</a>
+            <a class="me-2 btn btn-outline-primary" href="#">Вход</a>
+            <a class="me-2 btn btn-outline-primary" href="#">Регистрация</a>
+            <a class="me-3 btn btn-outline-primary" href="#">Стать продавцом</a>
+          </nav>
+        </div>
+      </div>
+<div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2em;">
+        <div class="card mb-4 rounded-3 shadow-sm" id="prod{{ el.id }}">
+            <div class="card-header py-3">
+              <h2 class="my-0 fw-normal">Бомбер "Satan Club"</h2>
+            </div>
+            <div class="card-body">
+              <div style="position:relative">
+                  <i class="fa-regular fa-heart heart-none" data-like="{{ el.id }}" data-price="{{ el.price }}"></i>
+                  <input hidden="hidden" type="checkbox" class="heart-checkbox">
+                  <a href="#"><img class="img-fluid" src="product1.png" alt="{{ a }}"></a>
+              </div>
+              <ul class="list-unstyled mt-3 mb-4">
+                <li>от 5990.0 руб.</li>
+                <li data-vendors="{{ el.vendors }}" data-cats="{{ el.cat }}" data-price="{{ el.price }}" class="vendors_li">
+                <a href="#"> <img width="30" height="30" src="2024-01-15_050852502.png"
+                                      alt="{{ el.main_logo }}"></a>
+                  Продавец MishanyaRedan</li>
+                <li>
+                    <a href="#"><img src="2024-01-12_044839400.png" alt="{{ logo }}" width="30" height="30"></a>
+                    <a href="#"><img src="2024-01-15_050852502.png" alt="{{ logo }}" width="30" height="30"></a>
+                </li>
+                <li>Предзаказ! Отправки в течение 7-8 недель.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card mb-4 rounded-3 shadow-sm" id="prod{{ el.id }}">
+            <div class="card-header py-3">
+              <h2 class="my-0 fw-normal">Бомбер "Satan Club"</h2>
+            </div>
+            <div class="card-body">
+              <div style="position:relative">
+                  <i class="fa-regular fa-heart heart-none" data-like="{{ el.id }}" data-price="{{ el.price }}"></i>
+                  <input hidden="hidden" type="checkbox" class="heart-checkbox">
+                  <a href="#"><img class="img-fluid" src="product1.png" alt="{{ a }}"></a>
+              </div>
+              <ul class="list-unstyled mt-3 mb-4">
+                <li>от 5990.0 руб.</li>
+                <li data-vendors="{{ el.vendors }}" data-cats="{{ el.cat }}" data-price="{{ el.price }}" class="vendors_li">
+                <a href="#"> <img width="30" height="30" src="2024-01-15_050852502.png"
+                                      alt="{{ el.main_logo }}"></a>
+                  Продавец MishanyaRedan</li>
+                <li>
+                    <a href="#"><img src="2024-01-12_044839400.png" alt="{{ logo }}" width="30" height="30"></a>
+                    <a href="#"><img src="2024-01-15_050852502.png" alt="{{ logo }}" width="30" height="30"></a>
+                </li>
+                <li>Предзаказ! Отправки в течение 7-8 недель.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card mb-4 rounded-3 shadow-sm" id="prod{{ el.id }}">
+            <div class="card-header py-3">
+              <h2 class="my-0 fw-normal">Бомбер "Satan Club"</h2>
+            </div>
+            <div class="card-body">
+              <div style="position:relative">
+                  <i class="fa-regular fa-heart heart-none" data-like="{{ el.id }}" data-price="{{ el.price }}"></i>
+                  <input hidden="hidden" type="checkbox" class="heart-checkbox">
+                  <a href="#"><img class="img-fluid" src="product1.png" alt="{{ a }}"></a>
+              </div>
+              <ul class="list-unstyled mt-3 mb-4">
+                <li>от 5990.0 руб.</li>
+                <li data-vendors="{{ el.vendors }}" data-cats="{{ el.cat }}" data-price="{{ el.price }}" class="vendors_li">
+                <a href="#"> <img width="30" height="30" src="2024-01-15_050852502.png"
+                                      alt="{{ el.main_logo }}"></a>
+                  Продавец MishanyaRedan</li>
+                <li>
+                    <a href="#"><img src="2024-01-12_044839400.png" alt="{{ logo }}" width="30" height="30"></a>
+                    <a href="#"><img src="2024-01-15_050852502.png" alt="{{ logo }}" width="30" height="30"></a>
+                </li>
+                <li>Предзаказ! Отправки в течение 7-8 недель.</li>
+              </ul>
+            </div>
+          </div>
+    </div>
+    
+</div>
+</body>
+<script>
+    function isNumberKey(evt) {
+    var charCode = (evt.which) ? evt.which : evt.keyCode
+    if (charCode > 31 && (charCode < 48 || charCode > 57))
+      return false;
+    return true;
+  }
+  //$(function() {
+    //  $('#btn_hidden').click();
+  //});
+  </script>
+  <script>
+      $(document).on("click", ".fa-plusminus", function() {
+          li = $(this).closest('div')
+          child_ul = li.children('div')
+          child_ul.toggleClass('pre-animation')
+          child_ul.toggleClass('pad_left')
+          $(this).toggleClass('fa-plus fa-minus rotate')
+    });
+  </script>
+  <script>
+    $(document).on("click", ".cat_checkbox", function() {
+          var cats = [];
+          $('#scrollable_checkboxes_cats input:checked').each(function() {
+              cats.push(Number(this.id.slice(3)));
+          });
+          var vend = [];
+          $('#scrollable_checkboxes_vendors input:checked').each(function() {
+              vend.push(Number(this.id.slice(3)));
+          });
+          $('.vendors_li').each(function() {
+            vendors = this.getAttribute('data-vendors').slice(1, -1).split(', ');
+            categories = this.getAttribute('data-cats').split(' ');
+            set1 = new Set(vendors);
+            set2 = new Set(vend);
+            set3 = new Set(categories);
+            set4 = new Set(cats);
+            intersection = [...set1].filter(x => set2.has(Number(x)));
+            intersection2 = [...set3].filter(x => set4.has(Number(x)));
+            if ((intersection.length > 0 || vend.length == 0) && (intersection2.length > 0 || cats.length == 0)) {
+                this.closest('.col').classList.remove("none_vendors");
+            }
+            else {
+                this.closest('.col').classList.add("none_vendors");
+            }
+          var event = new Event('input');
+          $(".priceForm input")[0].dispatchEvent(event);
+        });
+    });
+  </script>
+  <script>
+    $(".priceForm input").on("input", function() {
+        start = Number($("#start").val());
+        end = Number($("#end").val());
+        if (!end) end = 9999999999;
+        prices = $('#prices_hidden').val()
+        prices1 = prices.slice(1, -1).split(', ');
+        prices2 = prices.slice(1, -1).split(', ');
+        prices1.push(end)
+        prices2.push(start)
+        if ((Math.max.apply(null, prices2) == start) || (Math.min.apply(null, prices1) == end) || (start > end)) {
+            $(".priceForm input").addClass('cian_none')
+            return false
+        }
+        else {
+            $(".priceForm input").removeClass('cian_none')
+        }
+        $('.vendors_li').each(function() {
+            price = Number(this.getAttribute('data-price'));
+            if ((start > price) || (price > end)) {
+                this.closest('.col').classList.add("none");
+            }
+            else if ((start <= price) && (price <= end)) {
+                this.closest('.col').classList.remove("none");
+            }
+        });
+    });
+  </script>
+  <script>
+  $('.card').on('mouseenter', function() {
+      i = $('.fa-heart', $(this));
+      i.toggleClass('heart-none heart-visible');
+  });
+  $('.card').on('mouseleave', function() {
+      i = $('.fa-heart', $(this));
+      i.removeClass('red');
+      i.toggleClass('heart-none heart-visible');
+  });
+  $('.fa-heart').on('click', function(){
+    parent = $(this).closest('div')
+    checkbox = $('.heart-checkbox', parent)
+    if (checkbox.is(':checked')){
+        checkbox.prop('checked', false);
+      $.ajax({
+      data : {  liked_id: $(this).data('like'), 
+                liked_price: $(this).data('price'),
+                action: "dislike"},
+      type : 'POST',
+      url : '/kek'
+    });
+  } else {
+      checkbox.prop('checked', true);
+    $(this).addClass('red');
+    $.ajax({
+      data : {  liked_id: $(this).data('like'), 
+                liked_price: $(this).data('price'),
+                action: "like"},
+      type : 'POST',
+      url : '/kek'
+    });
+  }
+  $(this).toggleClass('fa-solid fa-regular');
+  count_liked()
+  })
+  </script>
+</html>

@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% set leng_str = leng|string %}
+{% if leng_str == '0' %}
+<div class="mb-4 cart_title">Избранное<small> (нет товаров) </small></div>
+{% elif leng_str[-1] == '1' %}
+<div class="mb-4 cart_title">Избранное<small> ({{ prods | length }} товар) </small></div>
+{% else %}
+<div class="mb-4 cart_title">Избранное<small> ({{ prods | length }} товара(-ов)) </small></div>
+{% endif %}
+<button>влцфвцфвоцрвфноцв</button>

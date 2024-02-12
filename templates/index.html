@@ -10,7 +10,7 @@
         <input type="checkbox" class="cat_checkbox" id="cat{{ key.id }}"/>
         {% if value %}
         <label for="cat{{ key.id }}">{{ key.title }}</label>
-        <i class="fa fa-plus"></i>
+        <i class="fa fa-plus fa-plusminus"></i>
         <br />
         {{ render_tree(value) }}
         {% else %}
@@ -31,7 +31,7 @@
       color: #afafaf !important;
       border-color: #afafaf !important;
       box-shadow: 0 0 0 .25rem rgba(175,175,175,.25) !important;
-      -webkit-box-shadow: box-shadow: 0 0 0 .25rem rgba(175,175,175,.25) !important;
+      -webkit-box-shadow: 0 0 0 .25rem rgba(175,175,175,.25) !important;
   }
   .listing {
     max-width: 100%;
@@ -119,9 +119,45 @@ label {
 }
 .fa {cursor: pointer; transition: transform .75s} /* adjust to your needs */
 .rotate {transform: rotate(180deg)}
-.card {transition: box-shadow 0.5s;}
-.card:hover {
-    box-shadow: 0 5px 10px gray !important;
+.heart-none {opacity:0}
+.heart-visible {opacity: 1}
+.fa-solid {
+    animation: vis-heart .4s;
+}
+.fa-regular {
+    animation: vis-heart-2 .4s;
+}
+.red {
+  color: rgb(240, 0, 0) !important;
+}
+.fa-heart:hover {
+    transform: scale(2);
+    color: rgb(240, 0, 0);
+}
+@keyframes vis-heart {
+        0% {
+          transform: scale(0);
+        }
+        100% {
+          transform: scale(1.6);
+        }
+}
+@keyframes vis-heart-2 {
+        0% {
+          transform: scale(0);
+        }
+        100% {
+          transform: scale(1.6);
+        }
+}
+.fa-heart {
+    cursor: pointer;
+    color: rgba(60, 60, 60, 1);
+    transition: transform 0.2s, opacity 0.3s, color 0.5s;
+    transform: scale(1.6);
+    position: absolute;
+    top: 0.4em;
+    right: 0.6em;
 }
 </style>
 {% endblock %}
@@ -165,17 +201,27 @@ label {
           <div class="card-body">
             {% if el.images %}
             {% set a = el.images.strip('"[').strip(']"').replace("'", "").replace(",", "").split()[0] %}
-            <a href="/product/{{ el.id }}"> <img class="img-fluid" src="static/img/{{ a }}" alt="{{ a }}"></a>
+            <div style="position:relative">
+              {% if el.id in liked %}
+                <i class="fa-solid fa-heart heart-none" data-like="{{ el.id }}" data-price="{{ el.price }}"></i>
+                <input hidden="hidden" type="checkbox" class="heart-checkbox" checked>
+                {% else %}
+                <i class="fa-regular fa-heart heart-none" data-like="{{ el.id }}" data-price="{{ el.price }}"></i>
+                <input hidden="hidden" type="checkbox" class="heart-checkbox">
+                {% endif %}
+                <a href="/product/{{ el.id }}"><img class="img-fluid" src="static/img/{{ a }}" alt="{{ a }}"></a>
+            </div>
             {% endif %}
             <ul class="list-unstyled mt-3 mb-4">
+                {% if el.price != -1 %}
               <li>от {{ el.price }} руб.</li>
-              <li>{{ el.description }}</li>
               <li data-vendors="{{ el.vendors }}" data-cats="{{ el.cat }}" data-price="{{ el.price }}" class="vendors_li">
                 {% if el.main_logo %}
               <a href="/cart"> <img width="30" height="30" src="/static/img/{{ el.main_logo }}"
                                     alt="{{ el.main_logo }}"></a>
                 {% endif %}
                 Продавец {{ el.vendor }}</li>
+                {% endif %}
               <li>
                 {% if el.logos %}
                 {% set b = el.logos.strip('"[').strip(']"').replace("'", "").split() %}
@@ -185,10 +231,8 @@ label {
                 {% endfor %}
                 {% endif %}
               </li>
+              <li>{{ el.description }}</li>
             </ul>
-            <a href="/product/{{ el.id }}" class="w-100 btn btn-lg btn-outline-primary">В корзину (от {{ el.vendor }})</a>
-            <p></p>
-            <a href="/product/{{ el.id }}" class="w-100 btn btn-lg btn-outline-primary">Подробнее</a>
           </div>
         </div>
       </div>
@@ -224,7 +268,7 @@ label {
 //});
 </script>
 <script>
-    $(document).on("click", "i", function() {
+    $(document).on("click", ".fa-plusminus", function() {
         li = $(this).closest('div')
         child_ul = li.children('div')
         child_ul.toggleClass('pre-animation')
@@ -289,5 +333,42 @@ label {
           }
       });
   });
+</script>
+<script>
+$('.card').on('mouseenter', function() {
+    i = $('.fa-heart', $(this));
+    i.toggleClass('heart-none heart-visible');
+});
+$('.card').on('mouseleave', function() {
+    i = $('.fa-heart', $(this));
+    i.removeClass('red');
+    i.toggleClass('heart-none heart-visible');
+});
+$('.fa-heart').on('click', function(){
+  parent = $(this).closest('div')
+  checkbox = $('.heart-checkbox', parent)
+  if (checkbox.is(':checked')){
+	  checkbox.prop('checked', false);
+    $.ajax({
+    data : {  liked_id: $(this).data('like'), 
+              liked_price: $(this).data('price'),
+              action: "dislike"},
+    type : 'POST',
+    url : '/kek'
+  });
+} else {
+	checkbox.prop('checked', true);
+  $(this).addClass('red');
+  $.ajax({
+    data : {  liked_id: $(this).data('like'), 
+              liked_price: $(this).data('price'),
+              action: "like"},
+    type : 'POST',
+    url : '/kek'
+  });
+}
+$(this).toggleClass('fa-solid fa-regular');
+count_liked()
+})
 </script>
 {% endblock %}
